@@ -23,6 +23,9 @@ const logoutController = require('./controllers/logoutController')
 const dashboardController = require('./controllers/dashboardController')
 
 //middleware
+const pathMiddleware = require('./middleware/pathMiddleware')
+pathMiddleware(app)
+
 const redirectifAuth = require('./middleware/redirectifAuth')
 const authMiddleware = require('./middleware/authMiddleware')
 
