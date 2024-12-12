@@ -1,5 +1,7 @@
 module.exports = (req ,res) => {
 
+    let firstname = ""
+    let lastname = ""
     let email = ""
     let password = ""
     let data = req.flash('data')[0]

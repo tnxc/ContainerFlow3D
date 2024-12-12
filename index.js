@@ -57,5 +57,5 @@ app.get('/logout', logoutController)
 app.get('/dashboard' , authMiddleware , dashboardController)
 
 app.listen(10000, () =>{
-    console.log("app listening on http://localhost:4000")
+    console.log("app listening on http://localhost:10000")
 }) 
