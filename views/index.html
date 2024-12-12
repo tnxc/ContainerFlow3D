@@ -38,17 +38,11 @@
                     </ul>
                 </div>
             </div>
-            <% if (loggedIn) { %>
-                <a href="/logout" class="btn btn-sm btn-danger">Logout</a>
-                <% } %>
-                    <% if (!loggedIn) { %>
-                        <a href="/login" class="login-button">Login</a>
-                        <% } %>
-                            <button class="navbar-toggler pe-0" type="button" data-bs-toggle="offcanvas"
-                                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar"
-                                aria-label="Toggle navigation">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
+            <a href="/login" id="loginButton" class="login-button">Login</a>
+            <button class="navbar-toggler pe-0" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
     </nav>
     <!-- End Navber -->
