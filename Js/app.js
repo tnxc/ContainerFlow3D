@@ -849,19 +849,35 @@ function placeBoxesFromInside(boxes) {
                 if (placed) break;
             }
 
-            // ถ้าไม่สามารถวางในแกน X หรือ Z ให้เปลี่ยนไปวางในแกน Y หรือแกนถัดไป
+            // หากไม่สามารถวางในแกน Y ได้ ให้ลองวางในแกนอื่น
             if (!placed) {
-                if (currentZ + boxLength > ConDepth / 2) {
-                    currentZ = -ConDepth / 2;
-                    currentY += boxHeight; // ขยับไปที่ระดับ Y ถัดไป
-                }
-                if (currentY + boxHeight > ConHeight / 2) {
-                    currentY = gridHelper.position.y; // รีเซ็ตกลับไปที่ค่าเดิม
-                    currentX += boxWidth; // ขยับไปที่แกน X ถัดไป
-                }
+                for (let x = currentX; x + boxLength <= ConWidth / 2; x += boxLength) {
+                    for (let z = currentZ; z + boxHeight <= ConDepth / 2; z += boxHeight) {
+                        for (let y = currentY; y + boxWidth <= ConHeight / 2; y += boxWidth) {
+                            const collision = occupiedSpace.some(space =>
+                                // ตรวจสอบการชนกันในทุกมิติ
+                                x < space.x + space.width &&
+                                x + boxLength > space.x &&
+                                z < space.z + space.length &&
+                                z + boxHeight > space.z &&
+                                y < space.y + space.height &&
+                                y + boxWidth > space.y
+                            );
 
-                // ตรวจสอบพื้นที่ใหม่ที่วางกล่องได้
-                placed = true;
+                            if (!collision) {
+                                // วางกล่องที่ตำแหน่งนี้
+                                create3DModel(boxLength, boxHeight, boxWidth, x + boxLength / 2, y, z + boxHeight / 2);
+
+                                // บันทึกพื้นที่ที่ถูกใช้ไป
+                                occupiedSpace.push({ x, y, z, width: boxLength, height: boxWidth, length: boxHeight });
+                                placed = true;
+                                break;
+                            }
+                        }
+                        if (placed) break;
+                    }
+                    if (placed) break;
+                }
             }
 
             if (!placed) {
@@ -870,3 +886,4 @@ function placeBoxesFromInside(boxes) {
         }
     });
 }
+

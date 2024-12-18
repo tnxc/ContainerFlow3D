@@ -63,21 +63,22 @@
     </nav>
 
     <div id="ContainerContent">
-        <h3>Container <i class="bi bi-filter-left" onclick="detailToggle('ContainerDetail')"
-                style="cursor: pointer; font-size: 35px; margin-left: 145px;"></i></h3>
+        <h3>
+            Container 
+            <i class="bi bi-filter-left" onclick="detailToggle('ContainerDetail')" style="cursor: pointer; font-size: 35px; margin-left: 135px;"></i>
+        </h3>
         <div id="cubeControl">
-            <h3>Cube Size Adjustments</h3>
             <div class="form-group">
-                <label for="width">Width (X):</label>
-                <input type="number" id="cwidth" class="form-control" value="3" />
+                <label for="width">Width:</label>   
+                <input type="number" id="cwidth" class="form-control" value="1" />
             </div>
             <div class="form-group">
-                <label for="height">Height (Y):</label>
+                <label for="Height">Length:</label>
+                <input type="number" id="clength" class="form-control" value="3" />
+            </div>
+            <div class="form-group">
+                <label for="Length">Height:</label>
                 <input type="number" id="cheight" class="form-control" value="1" />
-            </div>
-            <div class="form-group">
-                <label for="depth">Depth (Z):</label>
-                <input type="number" id="cdepth" class="form-control" value="1" />
             </div>
             <button class="btn btn-primary" onclick="updateCubeSize()">Update Cube Size</button>
         </div>
