@@ -28,7 +28,7 @@ const pointLight = new THREE.PointLight(0xffffff, 0.8);
 pointLight.position.set(0, 10, 0);
 scene.add(pointLight);
 
-const gridSize = 100;
+const gridSize = 300;
 const gridDivisions = gridSize / 5; 
 const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xe3e3e3, 0xe3e3e3); // กริดสีฟ้า
 gridHelper.rotation.y = -Math.PI / 2; 
@@ -39,6 +39,7 @@ scene.add(gridHelper);
 
 function animate() {
     requestAnimationFrame(animate);
+    
     controls.update();
     renderer.render(scene, camera);
 }
@@ -150,48 +151,57 @@ window.onload = function() {
 const geometry = new THREE.BoxGeometry(15,5,5);
 const material = new THREE.MeshBasicMaterial({ color: 0xcfd8ff, transparent: true, opacity: 0.5 });
 const cube = new THREE.Mesh(geometry, material);
+cube.position.set(0, 0, 0); // ขยับ Cube ขึ้น 0.1
 scene.add(cube);
 
 // เพิ่มเส้นขอบให้กับ Cube
 const edges = new THREE.EdgesGeometry(geometry);
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
 const line = new THREE.LineSegments(edges, lineMaterial);
+line.position.copy(cube.position); // กำหนดตำแหน่งเส้นขอบให้ตรงกับ Cube แรก
 scene.add(line);
 
 // สร้าง Cube ที่สอง (สีเข้มกว่า)
 const darkerMaterial = new THREE.MeshBasicMaterial({ color: 0x32343d, transparent: true, opacity: 0.5 });
-const darkerCubeGeometry = new THREE.BoxGeometry(15, 0.1, 5); // ขนาด y เป็น 0.2
+const darkerCubeGeometry = new THREE.BoxGeometry(15, 0.05, 5); // ขนาด y เป็น 0.2
 const darkerCube = new THREE.Mesh(darkerCubeGeometry, darkerMaterial);
-darkerCube.position.set(0, gridHelper.position.y - 0.1, 0); // เริ่มต้นใต้ Grid
+darkerCube.position.set(0, gridHelper.position.y -0.0245, 0); // เริ่มต้นใต้ Grid
 scene.add(darkerCube);
 
-// กำหนดตำแหน่งให้ Cube ใหม่นี้อยู่ใต้ grid เล็กน้อย
-darkerCube.position.y = gridHelper.position.y - 0;
+
+
 
 function updateCubeSize() {
-    const newWidth = parseFloat(document.getElementById('width').value);
-    const newHeight = parseFloat(document.getElementById('height').value);
-    const newDepth = parseFloat(document.getElementById('depth').value);
+    const newLength = parseFloat(document.getElementById('clength').value);
+    const newHeight = parseFloat(document.getElementById('cheight').value);
+    const newWidth = parseFloat(document.getElementById('cwidth').value);
 
-    // อัปเดต Cube
+    // คูณค่าทั้งสามก่อนใช้งาน
+    const multipliedWidth = newLength * 5;  // คุณสามารถปรับค่า 5 ตามต้องการ
+    const multipliedHeight = newHeight * 5; 
+    const multipliedDepth = newWidth * 5;
+
+    // ปรับขนาด Cube ตามค่าที่คูณแล้ว
     cube.geometry.dispose();
-    cube.geometry = new THREE.BoxGeometry(newWidth, newHeight, newDepth);
-    cube.position.y = gridHelper.position.y + newHeight / 2;
+    cube.geometry = new THREE.BoxGeometry(multipliedWidth, multipliedHeight, multipliedDepth);
+    cube.position.y = gridHelper.position.y + multipliedHeight / 2;
 
-    // อัปเดตเส้นขอบ Cube
     line.geometry.dispose();
-    const edges = new THREE.EdgesGeometry(cube.geometry);
-    line.geometry = edges;
+    line.geometry = new THREE.EdgesGeometry(cube.geometry);
     line.position.copy(cube.position);
 
-    // อัปเดต Cube ที่เป็นเส้นบางๆ ด้านล่าง
+    // ปรับขนาด darkerCube ให้เหมือนกับ cube แต่กำหนดให้ y เป็น gridHelper.position.y + 0.1
     darkerCube.geometry.dispose();
-    darkerCube.geometry = new THREE.BoxGeometry(newWidth, 0.2, newDepth);
-    darkerCube.position.set(cube.position.x, gridHelper.position.y - 0.1, cube.position.z);
+    darkerCube.geometry = new THREE.BoxGeometry(multipliedWidth, -0.0245, multipliedDepth); // ใช้ขนาดจาก cube
+    darkerCube.position.set(cube.position.x, gridHelper.position.y -0.0245 , cube.position.z);
 
     // อัปเดตไม้บรรทัด
     updateRulerX();
+    updateRulerY();
+    updateRulerZ();
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,19 +223,21 @@ function updateRulerX() {
     const rulerMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
     const rulerGeometry = new THREE.BoxGeometry(cubeWidth, 0.12, 0.12); // ความหนาเล็กน้อย
     const rulerLine = new THREE.Mesh(rulerGeometry, rulerMaterial);
+    const offsetZ = 0.15; // ระยะห่างจากด้านหน้าสุดของ cube
     rulerLine.position.set(
-        cube.position.x, // แก้ให้ตามตำแหน่ง x ของ cube
-        cube.position.y - cubeHeight / 2 + 5.1, // คำนวณตาม y
-        cube.position.z + cube.geometry.parameters.depth / 2 - 0.05 // คำนวณตาม z
+        cube.position.x + 0.05,
+        cube.position.y - cubeHeight / 2 + 0.05, // ตำแหน่ง Y ให้อยู่ใต้ Cube เล็กน้อย
+        cube.position.z + cube.geometry.parameters.depth / 2 + offsetZ // ด้านหน้าสุดของ Cube
     );
+
     rulerGroup.add(rulerLine);
 
     // สร้างเครื่องหมายระยะ 1 หน่วยบนไม้บรรทัด
     const markMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
     const unitLength = 1; // ระยะห่างของเครื่องหมาย
-    const startX = -cubeWidth / 2; // เริ่มจาก x ที่น้อยที่สุดของ Cube
+    const startX = -cubeWidth / 2 ; // เริ่มจาก x ที่น้อยที่สุดของ Cube
     const endX = cubeWidth / 2; // ไปจนถึง x ที่มากที่สุดของ Cube
-    const posY = cube.position.y - cubeHeight / 2 + 5; // ล่างสุด
+    const posY = cube.position.y - cubeHeight / 2 + 0.05; // ล่างสุด
     const posZ = cube.position.z + cube.geometry.parameters.depth / 2 + 0.1; // หน้าสุด
 
     for (let x = startX; x <= endX; x += unitLength) {
@@ -233,24 +245,28 @@ function updateRulerX() {
         const isLongMark = Math.round((x - startX) / unitLength) % 5 === 0;
 
         // สร้างเครื่องหมายเป็น BoxGeometry
-        const markGeometry = new THREE.BoxGeometry(0.12, isLongMark ? 1 : 0.5, 0.12); // ขนาดความยาวต่างกัน
+        const markGeometry = new THREE.BoxGeometry(
+            0.12, // ความหนาของเครื่องหมาย
+            0.12, // ความกว้างของเครื่องหมาย
+            isLongMark ? 1 : 0.5 // ความยาวต่างกันระหว่างขีดยาวและขีดสั้น
+        );
         const mark = new THREE.Mesh(markGeometry, markMaterial);
 
         // ตำแหน่งของเครื่องหมาย: X คงเดิม, Y ล่างสุด, Z ตามแนวลึก
         const adjustedX = cube.position.x + x; // อิงตำแหน่ง x ตาม cube
         const adjustedY = posY; // คงเดิมที่ระนาบด้านล่าง
-        const adjustedZ = posZ;
-        
+        const adjustedZ = posZ + 0.25;
+
         mark.position.set(
             adjustedX,
-            adjustedY + (isLongMark ? 0.8 / 2 : 0.4 / 2) + 0.2,
-            adjustedZ - 0.15 + cube.position.z // ปรับให้ขยับตามแกน Z ของ Cube
+            adjustedY,
+            adjustedZ // ปรับระยะยืดด้านเดียว
         );
+        
+        // การยืดเครื่องหมายในแนวแกน Z เพื่อให้ขีดยาวและสั้นตรงตามตำแหน่ง
+        mark.geometry.translate(0, 0, (isLongMark ? 0.5 : 0.25) / 2); // ยืดด้านเดียว
         rulerGroup.add(mark);
     }
-
-    // หมุนกลุ่มไม้บรรทัด 90 องศาตามแกน X
-    rulerGroup.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2); // หมุน 90 องศาตามแกน X
 
     scene.add(rulerGroup); // เพิ่มกลุ่มเข้าใน scene
 
@@ -266,36 +282,591 @@ function createRulerText(size, line) {
     loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
         const textMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
 
-        const unitLength = 5; // ระยะห่างของข้อความเป็น 5 หน่วย
-        const startX = -size / 2; // เริ่มจาก x ที่น้อยที่สุดของ Cube
-        const endX = size / 2; // ไปจนถึงขนาดของ Cube
-        const posY = line.geometry.attributes.position.array[1]; // ล่างสุด
-        const posZ = line.geometry.attributes.position.array[2]; // หน้าสุด
+        const unitLength = 5; // ระยะห่างของข้อความบนไม้บรรทัด
+        const startX = -size / 2; // จุดเริ่มต้น X
+        const endX = size / 2;   // จุดสิ้นสุด X
+        const textY = cube.position.y - cube.geometry.parameters.height / 2 + 0.05; // ต่ำกว่า Cube เล็กน้อย
+        const textZ = cube.position.z + cube.geometry.parameters.depth / 2 + 2.2; // หน้าสุดของ Cube
 
-        let number = 0; // เริ่มต้นตัวเลขที่จะแสดง
+        let number = 0; // ตัวแปรที่เก็บตัวเลขเริ่มต้นที่ 0
         for (let x = startX; x <= endX; x += unitLength) {
-            const textGeometry = new THREE.TextGeometry(`${number}`, {
+            // สร้างข้อความจากค่าของ x ที่ใช้เป็นตำแหน่ง
+            const textGeometry = new THREE.TextGeometry(number.toFixed(0), { // ใช้ number แทนค่าของ x
                 font: font,
-                size: 0.8, // เพิ่มขนาดข้อความ
+                size: 0.7,
                 height: 0.1,
             });
+
             const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-            textMesh.position.set(x, posY + 4.5, posZ + 2.4); // ตำแหน่งข้อความ
 
-            // หมุนข้อความกลับด้านในแกน X
-            textMesh.rotateX(Math.PI); // หมุน 180 องศาในแกน X
+            // ตรวจสอบตำแหน่งของตัวเลขว่าเป็นหลักหน่วยหรือหลักสิบ
+            const adjustedX = cube.position.x + x - 0.1;
+            const offset = (Math.abs(x) % 10 === 0) ? 0 : -0.2; // ปรับตำแหน่ง X สำหรับหลักสิบ
 
-            // ปรับตำแหน่งข้อความไปทางฝั่งตรงข้ามของไม้บรรทัด
-            textMesh.position.x = x - 0.35;
+            // ปรับตำแหน่งของข้อความ
+            textMesh.position.set(
+                adjustedX + offset, // ปรับตำแหน่ง X
+                textY,              // ตำแหน่ง Y คงที่
+                textZ               // ตำแหน่ง Z คงที่
+            );
 
-            rulerGroup.add(textMesh); // เพิ่มข้อความเข้าในกลุ่ม
-            number++; // เพิ่มตัวเลขทีละ 1
+            // หมุนข้อความให้หงายขึ้น
+            textMesh.rotation.x = -Math.PI / 2; // หมุน 90 องศาในแกน X (ทำให้ข้อความหงายขึ้น)
+            textMesh.rotation.y = 0;            // หมุน 0 องศาในแกน Y
+            textMesh.rotation.z = 0;            // หมุน 0 องศาในแกน Z
+
+            rulerGroup.add(textMesh);
+
+            number++; // เพิ่มค่า number ทีละ 1
         }
     });
 }
-
 
 updateRulerX();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function updateRulerY() {
+    // ลบกลุ่มไม้บรรทัดเก่า
+    if (scene.getObjectByName("rulerGroupY")) {
+        scene.remove(scene.getObjectByName("rulerGroupY"));
+    }
+
+    // สร้างกลุ่มใหม่สำหรับไม้บรรทัด
+    const rulerGroupY = new THREE.Group();
+    rulerGroupY.name = "rulerGroupY";
+
+    // ขนาดของ Cube
+    const cubeWidth = cube.geometry.parameters.width;
+    const cubeHeight = cube.geometry.parameters.height;
+
+    // สร้างเส้นหลักของไม้บรรทัดเป็น BoxGeometry
+    const rulerMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
+    const rulerGeometry = new THREE.BoxGeometry(0.12, cubeHeight, 0.12); // ความหนาเล็กน้อย
+    const rulerLine = new THREE.Mesh(rulerGeometry, rulerMaterial);
+    const offsetX = 0.00; // ระยะห่างจากด้านซ้ายสุดของ cube
+    rulerLine.position.set(
+        cube.position.x - cubeWidth / 2 + offsetX, // ด้านซ้ายสุดของ Cube
+        cube.position.y  ,                          // ตรงกลางในแกน Y
+        cube.position.z + cube.geometry.parameters.depth / 2 +0.15                          // ตรงกลางในแกน Z
+    );
+
+    rulerGroupY.add(rulerLine);
+
+    // สร้างเครื่องหมายระยะ 1 หน่วยบนไม้บรรทัด
+    const markMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
+    const unitLength = 1; // ระยะห่างของเครื่องหมาย
+    const startY = -cubeHeight / 2; // เริ่มจาก y ที่น้อยที่สุดของ Cube
+    const endY = cubeHeight / 2;   // ไปจนถึง y ที่มากที่สุดของ Cube
+    const posX = cube.position.x - cubeWidth / 2 - offsetX - 0.1; // ด้านซ้ายสุด
+    const posZ = cube.position.z + cube.geometry.parameters.depth / 2; // ตรงกลางในแกน Z
+
+    for (let y = startY; y <= endY; y += unitLength) {
+        // ตรวจสอบว่าตำแหน่งนี้เป็นขีดยาวหรือไม่
+        const isLongMark = Math.round((y - startY) / unitLength) % 5 === 0;
+        if (isLongMark && y === startY) continue;
+
+        // สร้างเครื่องหมายเป็น BoxGeometry
+        const markGeometry = new THREE.BoxGeometry(
+            0.12, // ความกว้างของเครื่องหมาย
+            isLongMark ? 1 : 0.5, // ความยาวต่างกันระหว่างขีดยาวและขีดสั้น
+            0.12  // ความหนาของเครื่องหมาย
+        );
+        const mark = new THREE.Mesh(markGeometry, markMaterial);
+
+        // ตำแหน่งของเครื่องหมาย: Y คงเดิม, X และ Z ตามแนวลึก
+        const adjustedX = posX;
+        const adjustedY = cube.position.y + y;
+        const adjustedZ = posZ;
+
+        mark.position.set(
+            adjustedX+0.1, // คงเดิมในแกน X
+            adjustedY, // ปรับระยะในแกน Y
+            adjustedZ+0.35   // คงเดิมในแกน Z
+        );
+        mark.rotation.z = Math.PI / 2; // หมุน 90 องศาในแกน Z
+        mark.rotation.y = Math.PI / 2; // หมุน 90 องศาในแกน Z
+
+        mark.geometry.translate(0, (isLongMark ? 0.5 : 0.25) / 2, 0); // ยืดด้านเดียวในแกน Y
+        rulerGroupY.add(mark);
+    }
+
+    scene.add(rulerGroupY); // เพิ่มกลุ่มเข้าใน scene
+
+    // สร้างข้อความบนไม้บรรทัด
+    createRulerTextY(cubeHeight, rulerLine);
+}
+
+function createRulerTextY(size, line) {
+    const rulerGroupY = scene.getObjectByName("rulerGroupY"); // อ้างอิงถึงกลุ่มไม้บรรทัด
+    if (!rulerGroupY) return;
+
+    const loader = new THREE.FontLoader();
+    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
+
+        const unitLength = 5; // ระยะห่างของข้อความบนไม้บรรทัด
+        const startY = -size / 2; // จุดเริ่มต้น Y
+        const endY = size / 2;   // จุดสิ้นสุด Y
+        const textX = cube.position.x - cube.geometry.parameters.width / 2 - 2.2; // ซ้ายสุดของ Cube
+        const textZ = cube.position.z + cube.geometry.parameters.depth / 2; // ตรงกลางในแกน Z
+
+        let number = 0; // ตัวแปรที่เก็บตัวเลขเริ่มต้นที่ 0
+        for (let y = startY; y <= endY; y += unitLength) {
+            // ข้ามการสร้างข้อความสำหรับเลข 0 ตัวแรก
+            if (number === 0) {
+                number++; // เพิ่มตัวเลขก่อนจะข้าม
+                continue;
+            }
+            // สร้างข้อความจากค่าของ y ที่ใช้เป็นตำแหน่ง
+            const textGeometry = new THREE.TextGeometry(number.toFixed(0), { // ใช้ number แทนค่าของ y
+                font: font,
+                size: 0.7,
+                height: 0.1,
+            });
+
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+            // ปรับตำแหน่งของข้อความ
+            textMesh.position.set(
+                textX +2.15,               // ตำแหน่ง X คงที่
+                cube.position.y + y -0.3, // ตำแหน่ง Y ปรับตาม
+                textZ + 2                // ตำแหน่ง Z คงที่
+            );
+
+            // หมุนข้อความให้หงายขึ้น
+            textMesh.rotation.x = 0;
+            textMesh.rotation.y = Math.PI / 2; // หมุน 90 องศาในแกน Y
+            textMesh.rotation.z = 0;
+
+            rulerGroupY.add(textMesh);
+
+            number++; // เพิ่มค่า number ทีละ 1
+        }
+    });
+}
+
+updateRulerY();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function updateRulerZ() {
+    // ลบกลุ่มไม้บรรทัดเก่า
+    if (scene.getObjectByName("rulerGroupZ")) {
+        scene.remove(scene.getObjectByName("rulerGroupZ"));
+    }
+
+    // สร้างกลุ่มใหม่สำหรับไม้บรรทัด
+    const rulerGroupZ = new THREE.Group();
+    rulerGroupZ.name = "rulerGroupZ";
+
+    // ขนาดของ Cube
+    const cubeDepth = cube.geometry.parameters.depth;
+    const cubeHeight = cube.geometry.parameters.height;
+
+    // สร้างเส้นหลักของไม้บรรทัดเป็น BoxGeometry
+    const rulerMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
+    const rulerGeometry = new THREE.BoxGeometry(0.12, 0.12, cubeDepth); // ความหนาเล็กน้อย
+    const rulerLine = new THREE.Mesh(rulerGeometry, rulerMaterial);
+    const offsetX = 0.15; // ระยะห่างจากด้านขวาสุดของ cube
+    rulerLine.position.set(
+        cube.position.x + cube.geometry.parameters.width / 2 + offsetX, // ด้านขวาสุด
+        cube.position.y - cubeHeight / 2 + 0.05, // ด้านล่าง
+        cube.position.z  // กึ่งกลางแกน Z
+    );
+
+    rulerGroupZ.add(rulerLine);
+
+    // สร้างเครื่องหมายระยะ 1 หน่วยบนไม้บรรทัด
+    const markMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
+    const unitLength = 1; // ระยะห่างของเครื่องหมาย
+    const startZ = -cubeDepth / 2; // เริ่มจาก z ที่น้อยที่สุดของ Cube
+    const endZ = cubeDepth / 2;   // ไปจนถึง z ที่มากที่สุดของ Cube
+    const posX = cube.position.x + cube.geometry.parameters.width / 2 + 0.2; // ขวาสุด
+    const posY = cube.position.y - cubeHeight / 2 + 0.05; // ล่างสุด
+
+    for (let z = startZ; z <= endZ; z += unitLength) {
+        // ตรวจสอบว่าตำแหน่งนี้เป็นขีดยาวหรือไม่
+        const isLongMark = Math.round((z - startZ) / unitLength) % 5 === 0;
+
+
+        // สร้างเครื่องหมายเป็น BoxGeometry
+        const markGeometry = new THREE.BoxGeometry(
+            0.12, // ความกว้างของเครื่องหมาย
+            0.12, // ความหนาของเครื่องหมาย
+            isLongMark ? 1 : 0.5 // ความยาวต่างกันระหว่างขีดยาวและขีดสั้น
+        );
+        const mark = new THREE.Mesh(markGeometry, markMaterial);
+
+        // ตำแหน่งของเครื่องหมาย: Z คงเดิม, X และ Y ตามแนวลึก
+        const adjustedX = posX;
+        const adjustedY = posY;
+        const adjustedZ = cube.position.z + z;
+
+        mark.position.set(
+            adjustedX,
+            adjustedY,
+            adjustedZ
+        );
+        mark.rotation.z = Math.PI / 2; // หมุน 90 องศาในแกน Z
+        mark.rotation.y = Math.PI / 2; // หมุน 90 องศาในแกน Z
+
+        mark.geometry.translate(0, 0, (isLongMark ? 0.5 : 0.25) / 2); // ยืดด้านเดียวในแกน Z
+        rulerGroupZ.add(mark);
+    }
+
+    scene.add(rulerGroupZ); // เพิ่มกลุ่มเข้าใน scene
+
+    // สร้างข้อความบนไม้บรรทัด
+    createRulerTextZ(cubeDepth, rulerLine);
+}
+
+function createRulerTextZ(size, line) {
+    const rulerGroupZ = scene.getObjectByName("rulerGroupZ"); // อ้างอิงถึงกลุ่มไม้บรรทัด
+    if (!rulerGroupZ) return;
+
+    const loader = new THREE.FontLoader();
+    loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x5b6a85 }); // สีเทา
+
+        const unitLength = 5; // ระยะห่างของข้อความบนไม้บรรทัด
+        const startZ = -size / 2; // จุดเริ่มต้น Z
+        const endZ = size / 2;   // จุดสิ้นสุด Z
+        const textX = cube.position.x + cube.geometry.parameters.width / 2 + 1.2; // ขวาสุดของ Cube
+        const textY = cube.position.y - cube.geometry.parameters.height / 2 + 0.05; // ต่ำกว่า Cube เล็กน้อย
+
+        let number = 0; // ตัวแปรที่เก็บตัวเลขเริ่มต้นที่ 0
+        for (let z = startZ; z <= endZ; z += unitLength) {
+
+            // สร้างข้อความจากค่าของ z ที่ใช้เป็นตำแหน่ง
+            const textGeometry = new THREE.TextGeometry(number.toFixed(0), { // ใช้ number แทนค่าของ z
+                font: font,
+                size: 0.7,
+                height: 0.1,
+            });
+
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+            // ปรับตำแหน่งของข้อความ
+            const adjustedZ = cube.position.z + z;
+            textMesh.position.set(
+                textX,
+                textY,
+                adjustedZ +0.3
+            );
+
+            // หมุนข้อความให้หงายขึ้น
+            textMesh.rotation.x = -Math.PI / 2; // หมุน 90 องศาในแกน X (ทำให้ข้อความหงายขึ้น)
+            textMesh.rotation.y = 0;            // หมุน 0 องศาในแกน Y
+            textMesh.rotation.z = 0;            // หมุน 0 องศาในแกน Z
+
+            rulerGroupZ.add(textMesh);
+
+            number++; // เพิ่มค่า number ทีละ 1
+        }
+    });
+}
+
+updateRulerZ();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+let boxCounter = 1; // ตัวแปรสำหรับนับจำนวน box
+
+function addBox() {
+    // สร้าง div ใหม่สำหรับฟอร์ม
+    const newBox = document.createElement("div");
+    newBox.className = "box";
+    newBox.setAttribute('data-box-id', boxCounter); // เพิ่ม ID ให้แต่ละ box เพื่อใช้ในการจัดการ
+
+    // กำหนดสไตล์ให้กับ newBox
+    newBox.style.margin = "15px 0";
+    newBox.style.padding = "15px";
+    newBox.style.border = "1px solid #ccc";
+    newBox.style.borderRadius = "5px";
+    newBox.style.backgroundColor = "#f9f9f9";
+    newBox.style.cursor = "pointer";
+
+    // ข้อมูลที่แสดงใน box
+    const boxContent = document.createElement("div");
+    boxContent.innerHTML = `
+        <div><strong>Box ${boxCounter}</strong></div>
+        <div>Width: 10, Length: 10, Height: 10</div>
+        <div>Weight: 10kg, Quantity: 1</div>
+    `;
+    newBox.appendChild(boxContent);
+
+    // เพิ่ม newBox เข้าไปใน div boxContent
+    document.getElementById("boxContent").appendChild(newBox);
+
+    // สร้าง div สำหรับฟอร์มแก้ไข
+    const editForm = document.createElement("div");
+    editForm.className = "editForm";
+    editForm.style.display = "none"; // ซ่อนไว้ก่อน
+    newBox.appendChild(editForm);
+
+    // สร้าง input fields สำหรับแก้ไขข้อมูล
+    const widthInput = createInput('Width', '10');
+    const lengthInput = createInput('Length', '10');
+    const heightInput = createInput('Height', '10');
+    const weightInput = createInput('Weight', '10kg');
+    const quantityInput = createInput('Quantity', '1');
+
+    // สร้างปุ่มบันทึกและลบ
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save";
+    saveButton.style.backgroundColor = "#4CAF50";
+    saveButton.style.color = "white";
+    saveButton.style.padding = "10px 20px";
+    saveButton.style.border = "none";
+    saveButton.style.borderRadius = "4px";
+    saveButton.style.fontSize = "16px";
+    saveButton.style.cursor = "pointer";
+    saveButton.addEventListener('click', function() {
+        saveBoxData(newBox, widthInput, lengthInput, heightInput, weightInput, quantityInput, editForm);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.style.backgroundColor = "#f44336";
+    deleteButton.style.color = "white";
+    deleteButton.style.padding = "10px 20px";
+    deleteButton.style.border = "none";
+    deleteButton.style.borderRadius = "4px";
+    deleteButton.style.fontSize = "16px";
+    deleteButton.style.cursor = "pointer";
+    deleteButton.addEventListener('click', function() {
+        deleteBox(newBox);
+    });
+
+    // เพิ่ม input และปุ่มลงใน editForm
+    editForm.appendChild(widthInput);
+    editForm.appendChild(lengthInput);
+    editForm.appendChild(heightInput);
+    editForm.appendChild(weightInput);
+    editForm.appendChild(quantityInput);
+    editForm.appendChild(saveButton);
+    editForm.appendChild(deleteButton);
+
+    // เพิ่ม event listener สำหรับคลิกที่ box
+    newBox.addEventListener('click', function(event) {
+        // ตรวจสอบว่าไม่ใช่การคลิกใน input
+        if (event.target !== widthInput && event.target !== lengthInput && event.target !== heightInput && event.target !== weightInput && event.target !== quantityInput) {
+            toggleEditForm(editForm);
+        }
+    });
+
+    // เพิ่มตัวเลข boxCounter
+    boxCounter++;
+}
+
+function createInput(labelText, defaultValue) {
+    const label = document.createElement("label");
+    label.textContent = labelText;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = defaultValue;
+    input.style.margin = "5px";
+    input.style.width = "150px";
+
+    const container = document.createElement("div");
+    container.appendChild(label);
+    container.appendChild(input);
+
+    // ใช้ stopPropagation เพื่อป้องกันการคลิกที่ input ที่จะไปกระทบกับ event ของ newBox
+    input.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    return container;
+}
+
+function toggleEditForm(editForm) {
+    // ทำการซ่อนหรือแสดงฟอร์มแก้ไข
+    if (editForm.style.display === "none") {
+        editForm.style.display = "block";
+    } else {
+        editForm.style.display = "none";
+    }
+}
+
+function saveBoxData(boxElement, widthInput, lengthInput, heightInput, weightInput, quantityInput, editForm) {
+    const boxId = boxElement.getAttribute('data-box-id'); // รับข้อมูล boxId
+
+    // บันทึกข้อมูลที่กรอก
+    const boxContent = boxElement.querySelector("div");
+    boxContent.innerHTML = `
+        <div><strong>Box ${boxId}</strong></div>
+        <div>Width: ${widthInput.querySelector("input").value}, Length: ${lengthInput.querySelector("input").value}, Height: ${heightInput.querySelector("input").value}</div>
+        <div>Weight: ${weightInput.querySelector("input").value}, Quantity: ${quantityInput.querySelector("input").value}</div>
+    `;
+    // ซ่อนฟอร์มแก้ไขหลังบันทึก
+    editForm.style.display = "none";
+}
+
+function deleteBox(boxElement) {
+    // ลบ box ออกจาก DOM
+    boxElement.remove();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let boxModels = []; // ตัวแปรเก็บโมเดล 3D ที่สร้างขึ้น
+let createdModels = [];  // ตัวแปรเก็บโมเดล 3D ที่สร้างขึ้น
+
+
+function manageAction() {
+    // ลบโมเดลเก่าทั้งหมด
+    clearPreviousModels();
+
+    const boxes = document.querySelectorAll('.box'); // ดึงทุก box ที่มีอยู่ใน DOM
+    const boxDataArray = []; // ตัวแปรเก็บข้อมูลกล่องทั้งหมด
+
+    boxes.forEach((box) => {
+        // ดึงข้อมูลจากแต่ละ box
+        const width = parseFloat(box.querySelector('div').innerText.match(/Width: (\d+)/)[1]);
+        const length = parseFloat(box.querySelector('div').innerText.match(/Length: (\d+)/)[1]);
+        const height = parseFloat(box.querySelector('div').innerText.match(/Height: (\d+)/)[1]);
+        const weight = parseFloat(box.querySelector('div').innerText.match(/Weight: (\d+)/)[1].replace('kg', ''));
+        const quantity = parseInt(box.querySelector('div').innerText.match(/Quantity: (\d+)/)[1]);
+
+        // เพิ่มข้อมูลแต่ละกล่องเข้า array
+        boxDataArray.push({ width, length, height, weight, quantity });
+
+        console.log(box.querySelector('div').innerText);
+    });
+
+    // เรียกใช้ placeBoxesFromInside ด้วยข้อมูลกล่องที่ได้
+    placeBoxesFromInside(boxDataArray);
+}
+
+function create3DModel(width, length, height, x, y, z) {
+    const geometry = new THREE.BoxGeometry(width, height, length);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+
+    cube.position.set(x, y + height / 2, z);
+
+    const edges = new THREE.EdgesGeometry(geometry);
+    const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const line = new THREE.LineSegments(edges, edgeMaterial);
+    line.position.set(x, y + height / 2, z);
+
+    scene.add(cube);
+    scene.add(line);
+
+    createdModels.push(cube);
+    createdModels.push(line);
+}
+
+function clearPreviousModels() {
+    // ลบโมเดลเก่าที่มีอยู่ใน createdModels
+    createdModels.forEach(model => {
+        scene.remove(model);  // ลบจาก scene
+    });
+    createdModels = [];  // รีเซ็ต array ของโมเดล
+}
+
+function saveBoxData(boxElement, widthInput, lengthInput, heightInput, weightInput, quantityInput, editForm) {
+    const boxId = boxElement.getAttribute('data-box-id'); // รับข้อมูล boxId
+
+    // ดึงค่าที่ผู้ใช้กรอกใหม่
+    const newWidth = parseFloat(widthInput.querySelector("input").value);
+    const newLength = parseFloat(lengthInput.querySelector("input").value);
+    const newHeight = parseFloat(heightInput.querySelector("input").value);
+
+    // อัปเดตข้อมูลใน boxContent
+    const boxContent = boxElement.querySelector("div");
+    boxContent.innerHTML = `
+        <div><strong>Box ${boxId}</strong></div>
+        <div>Width: ${newWidth}, Length: ${newLength}, Height: ${newHeight}</div>
+        <div>Weight: ${weightInput.querySelector("input").value}, Quantity: ${quantityInput.querySelector("input").value}</div>
+    `;
+
+    // อัปเดตโมเดล 3D ใน boxModels
+    const box3D = boxModels[boxId - 1]; // ดึงโมเดลที่ตรงกับ boxId
+    if (box3D) {
+        box3D.geometry.dispose(); // ลบ geometry เก่า
+        box3D.geometry = new THREE.BoxGeometry(newWidth, newHeight, newLength); // อัปเดต geometry
+    }
+
+    // ซ่อนฟอร์มแก้ไขหลังบันทึก
+    editForm.style.display = "none";
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function placeBoxesFromInside(boxes) {
+    const newCLength = parseFloat(document.getElementById('clength').value);
+    const newCHeight = parseFloat(document.getElementById('cheight').value);
+    const newCWidth = parseFloat(document.getElementById('cwidth').value);
+
+    const ConWidth = newCLength * 5;
+    const ConHeight = newCHeight * 5;
+    const ConDepth = newCWidth * 5;
+
+    const occupiedSpace = []; // เก็บพื้นที่ที่ถูกใช้งาน
+
+    let currentX = -ConWidth / 2;
+    let currentY = gridHelper.position.y;
+    let currentZ = -ConDepth / 2;
+
+    boxes.sort((a, b) => (b.width * b.length * b.height) - (a.width * a.length * a.height));
+
+    boxes.forEach((box) => {
+        const boxWidth = parseFloat(box.width) * 0.05;
+        const boxLength = parseFloat(box.length) * 0.05;
+        const boxHeight = parseFloat(box.height) * 0.05;
+
+        for (let i = 0; i < box.quantity; i++) {
+            let placed = false;
+
+            // ลูปหาพื้นที่ว่างที่เหมาะสม
+            for (let x = currentX; x + boxWidth <= ConWidth / 2; x += boxWidth) {
+                for (let z = currentZ; z + boxLength <= ConDepth / 2; z += boxLength) {
+                    for (let y = currentY; y + boxHeight <= ConHeight / 2; y += boxHeight) {
+                        const collision = occupiedSpace.some(space =>
+                            // ตรวจสอบการชนกันในทุกมิติ
+                            x < space.x + space.width &&
+                            x + boxWidth > space.x &&
+                            z < space.z + space.length &&
+                            z + boxLength > space.z &&
+                            y < space.y + space.height &&
+                            y + boxHeight > space.y
+                        );
+
+                        if (!collision) {
+                            // วางกล่องที่ตำแหน่งนี้
+                            create3DModel(boxWidth, boxLength, boxHeight, x + boxWidth / 2, y, z + boxLength / 2);
+
+                            // บันทึกพื้นที่ที่ถูกใช้ไป
+                            occupiedSpace.push({ x, y, z, width: boxWidth, height: boxHeight, length: boxLength });
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (placed) break;
+                }
+                if (placed) break;
+            }
+
+            // ถ้าไม่สามารถวางในแกน X หรือ Z ให้เปลี่ยนไปวางในแกน Y หรือแกนถัดไป
+            if (!placed) {
+                if (currentZ + boxLength > ConDepth / 2) {
+                    currentZ = -ConDepth / 2;
+                    currentY += boxHeight; // ขยับไปที่ระดับ Y ถัดไป
+                }
+                if (currentY + boxHeight > ConHeight / 2) {
+                    currentY = gridHelper.position.y; // รีเซ็ตกลับไปที่ค่าเดิม
+                    currentX += boxWidth; // ขยับไปที่แกน X ถัดไป
+                }
+
+                // ตรวจสอบพื้นที่ใหม่ที่วางกล่องได้
+                placed = true;
+            }
+
+            if (!placed) {
+                console.log("พื้นที่ไม่เพียงพอสำหรับวางกล่อง");
+            }
+        }
+    });
+}

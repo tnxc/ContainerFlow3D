@@ -4,20 +4,25 @@ body {
     overflow: hidden;
     background-color: #FFFFFF;
 }
-html{
+
+html {
     height: 100%;
     margin: 0;
     margin-top: 0;
-    overflow: hidden;  /* ป้องกันการเลื่อนหน้า */
+    overflow: hidden;
+    /* ป้องกันการเลื่อนหน้า */
 }
+
 #logo {
     width: 80px;
 }
+
 .btn {
     margin-left: 10px;
 }
 
-#ContainerContent, #boxContent {
+#ContainerContent,
+#boxContent {
     display: none;
     position: absolute;
     top: 11%;
@@ -31,8 +36,12 @@ html{
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     transition: box-shadow 0.3s ease, transform 0.3s ease;
     z-index: 10;
+    overflow-y: auto;
+    /* เมื่อเนื้อหามากกว่าความสูงจะสามารถเลื่อนขึ้นลงได้ */
 }
-#ContainerDetail,#BoxDetail {
+
+#ContainerDetail,
+#BoxDetail {
     display: none;
     position: absolute;
     top: 11%;
@@ -41,29 +50,37 @@ html{
     background-color: #ffffff;
     width: 80%;
     max-width: 1255px;
-    height: 737px;
+    max-height: 737px;
     animation: slideDetail 0.5s forwards;
     border-radius: 15px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     transition: box-shadow 0.3s ease, transform 0.3s ease;
     z-index: 9;
+    overflow-y: auto;
+    /* เพิ่มการเลื่อนในแนวตั้ง */
 }
+
 @keyframes slideDetail {
-    from { 
-        left: -100%; 
-        opacity: 0; /* ทำให้กล่องโปร่งใสในตอนเริ่มต้น */
+    from {
+        left: -100%;
+        opacity: 0;
+        /* ทำให้กล่องโปร่งใสในตอนเริ่มต้น */
     }
-    to { 
+
+    to {
         left: 350;
-        opacity: 1; /* ทำให้กล่องแสดงเมื่อเคลื่อนที่ */
+        opacity: 1;
+        /* ทำให้กล่องแสดงเมื่อเคลื่อนที่ */
     }
 }
+
 @keyframes slideDetailHide {
-    from { 
+    from {
         left: 350px;
         opacity: 1;
     }
-    to { 
+
+    to {
         left: -100%;
         opacity: 0;
     }
@@ -71,67 +88,100 @@ html{
 
 
 @keyframes slideLeft {
-    from { 
-        left: -100%; 
-        opacity: 0; /* ทำให้กล่องโปร่งใสในตอนเริ่มต้น */
+    from {
+        left: -100%;
+        opacity: 0;
+        /* ทำให้กล่องโปร่งใสในตอนเริ่มต้น */
     }
-    to { 
+
+    to {
         left: 0;
-        opacity: 1; /* ทำให้กล่องแสดงเมื่อเคลื่อนที่ */
+        opacity: 1;
+        /* ทำให้กล่องแสดงเมื่อเคลื่อนที่ */
     }
 }
 
-#listContent, #backupContent {
+#listContent,
+#backupContent {
     display: none;
     position: absolute;
-    top: 0; /* ติดกับ navbar */
+    top: 0;
+    /* ติดกับ navbar */
     left: 0;
     padding: 20px;
     background-color: #f0f0f0;
-    width: 100%; /* ปรับให้เต็มความกว้างของหน้า */
-    height: 100vh; /* ครอบคลุมทั้งความสูงของหน้าจอ */
+    width: 100%;
+    /* ปรับให้เต็มความกว้างของหน้า */
+    height: 100vh;
+    /* ครอบคลุมทั้งความสูงของหน้าจอ */
     animation: slideTop 0.5s forwards;
     z-index: 5;
-    margin-top: -28px; /* ขยับลงมาเพื่อไม่ให้บัง navbar */
-    background-color: rgb(255, 255, 255); /* โปร่งแสงที่ 70% */
-    border: 1px solid #ddd; /* กรอบบางๆ เพิ่มความคมชัด */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* เพิ่มเงาให้เด่นขึ้น */
-    transition: box-shadow 0.3s ease, transform 0.3s ease; /* เพิ่มการเคลื่อนไหว */
+    margin-top: -28px;
+    /* ขยับลงมาเพื่อไม่ให้บัง navbar */
+    background-color: rgb(255, 255, 255);
+    /* โปร่งแสงที่ 70% */
+    border: 1px solid #ddd;
+    /* กรอบบางๆ เพิ่มความคมชัด */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    /* เพิ่มเงาให้เด่นขึ้น */
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    /* เพิ่มการเคลื่อนไหว */
 
     /* ขอบมน */
     border-radius: 15px;
 }
-#ContainerDetail, #BoxDetail {
+
+#ContainerDetail,
+#BoxDetail {
     display: none;
 }
+
 .active-btn {
-    background-color: #007BFF; /* ตัวอย่างสีปุ่มที่ active */
+    background-color: #ffffff;
+    /* ตัวอย่างสีปุ่มที่ active */
     color: #fff;
 }
+
 nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 10;
-    background-color: #007bff;
+    background-color: #ffffff;
     padding: 10px 0;
-    height: 90px; /* กำหนดความสูงของ navbar เป็น 80px */
+    height: 90px;
+    /* กำหนดความสูงของ navbar เป็น 80px */
 }
 
 @keyframes slideTop {
-    from { top: -100%; }
-    to { top: 13%; }
+    from {
+        top: -100%;
+    }
+
+    to {
+        top: 13%;
+    }
 }
 
 @keyframes slideOutTop {
-    from { top: 13%; }
-    to { top: -100%; }
+    from {
+        top: 13%;
+    }
+
+    to {
+        top: -100%;
+    }
 }
 
 @keyframes slideOut {
-    from { left: 0; }
-    to { left: -100%; }
+    from {
+        left: 0;
+    }
+
+    to {
+        left: -100%;
+    }
 }
 
 .active-btn {
@@ -149,10 +199,12 @@ nav {
     bottom: -60px;
     left: 55%;
     transform: translateX(-50%);
-    width: 60%; /* กำหนดความกว้างของฟุตเตอร์ */
+    width: 60%;
+    /* กำหนดความกว้างของฟุตเตอร์ */
     height: 145px;
     padding: 20px;
-    background-color: rgba(240, 240, 240, 0.9); /* โปร่งแสงที่ 90% */
+    background-color: rgba(240, 240, 240, 0.9);
+    /* โปร่งแสงที่ 90% */
     color: #333;
     text-align: center;
     border-top: 1px solid #ddd;
@@ -160,43 +212,62 @@ nav {
     font-size: 14px;
     z-index: 7;
     border-radius: 5px;
-    transition: bottom 0.5s ease; /* เพิ่มการแอนิเมชันให้ฟุตเตอร์ */
+    transition: bottom 0.5s ease;
+    /* เพิ่มการแอนิเมชันให้ฟุตเตอร์ */
 }
 
 #toggleButton {
     position: absolute;
-    bottom: 95px; /* ตั้งค่าเริ่มต้นของปุ่มให้ถูกต้อง */
+    bottom: 95px;
+    /* ตั้งค่าเริ่มต้นของปุ่มให้ถูกต้อง */
     left: 428px;
     transform: translateX(-50%);
-    width: 50px; /* กำหนดขนาดความกว้างของปุ่ม */
-    height: 40px; /* กำหนดขนาดความสูงของปุ่ม */
+    width: 50px;
+    /* กำหนดขนาดความกว้างของปุ่ม */
+    height: 40px;
+    /* กำหนดขนาดความสูงของปุ่ม */
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 10px; /* ขอบมน */
+    border-radius: 10px;
+    /* ขอบมน */
     cursor: pointer;
     z-index: 7;
-    transition: bottom 0.5s ease, box-shadow 0.3s ease, transform 0.3s ease; /* เพิ่มการแอนิเมชันให้กับปุ่ม */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* เพิ่มเงาให้กับปุ่ม */
-    display: flex; /* ใช้ flexbox เพื่อจัดตำแหน่ง */
-    align-items: center; /* จัดตำแหน่งไอคอนแนวตั้งให้อยู่กลาง */
-    justify-content: center; /* จัดตำแหน่งไอคอนแนวนอนให้อยู่กลาง */
+    transition: bottom 0.5s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    /* เพิ่มการแอนิเมชันให้กับปุ่ม */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* เพิ่มเงาให้กับปุ่ม */
+    display: flex;
+    /* ใช้ flexbox เพื่อจัดตำแหน่ง */
+    align-items: center;
+    /* จัดตำแหน่งไอคอนแนวตั้งให้อยู่กลาง */
+    justify-content: center;
+    /* จัดตำแหน่งไอคอนแนวนอนให้อยู่กลาง */
 }
 
 #toggleButton i {
-    font-size: 35px; /* ปรับขนาดไอคอน */
-    margin-top: 0px;  /* เพิ่มระยะห่างจากขอบบนของปุ่ม */
+    font-size: 35px;
+    /* ปรับขนาดไอคอน */
+    margin-top: 0px;
+    /* เพิ่มระยะห่างจากขอบบนของปุ่ม */
 }
+
 #toggleButton:hover {
-    background-color: #0056b3; /* เปลี่ยนสีเมื่อ hover */
-    transform: translateX(-50%) scale(1.05); /* ขยายปุ่มเล็กน้อยเมื่อ hover */
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3); /* เพิ่มเงาเมื่อ hover */
+    background-color: #0056b3;
+    /* เปลี่ยนสีเมื่อ hover */
+    transform: translateX(-50%) scale(1.05);
+    /* ขยายปุ่มเล็กน้อยเมื่อ hover */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    /* เพิ่มเงาเมื่อ hover */
 }
 
 #toggleButton:active {
-    background-color: #004085; /* สีเมื่อคลิก */
-    transform: translateX(-50%) scale(0.95); /* ลดขนาดเมื่อคลิก */
+    background-color: #004085;
+    /* สีเมื่อคลิก */
+    transform: translateX(-50%) scale(0.95);
+    /* ลดขนาดเมื่อคลิก */
 }
+
 /* CSS สำหรับ loading screen */
 /* CSS สำหรับ loading screen */
 #loadingScreen {
@@ -219,13 +290,19 @@ nav {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* CSS สำหรับเนื้อหาหลัก */
 #content {
-    display: none; /* ซ่อนเนื้อหาหลักตอนเริ่มต้น */
+    display: none;
+    /* ซ่อนเนื้อหาหลักตอนเริ่มต้น */
 }
 
 #cubeControl {
@@ -249,3 +326,38 @@ nav {
 #cubeControl button {
     width: 100%;
 }
+
+#manageButton {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+#manageButton:hover {
+    background-color: #0056b3;
+}
+
+.navbar .logoname {
+    font-size: 32px;
+}
+
+.navbar .logoname .textleft {
+    color: #6c757d;
+}
+
+.navbar .logoname .textright {
+    color: #6a98b3;
+}
+
