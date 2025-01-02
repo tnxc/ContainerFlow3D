@@ -63,25 +63,10 @@
     </nav>
 
     <div id="ContainerContent">
-        <h3>
-            Container 
-            <i class="bi bi-filter-left" onclick="detailToggle('ContainerDetail')" style="cursor: pointer; font-size: 35px; margin-left: 135px;"></i>
+        <h3 style="margin-left: 5px;">
+            Container
         </h3>
-        <div id="cubeControl">
-            <div class="form-group">
-                <label for="width">Width:</label>   
-                <input type="number" id="cwidth" class="form-control" value="1" />
-            </div>
-            <div class="form-group">
-                <label for="Height">Length:</label>
-                <input type="number" id="clength" class="form-control" value="3" />
-            </div>
-            <div class="form-group">
-                <label for="Length">Height:</label>
-                <input type="number" id="cheight" class="form-control" value="1" />
-            </div>
-            <button class="btn btn-primary" onclick="updateCubeSize()">Update Cube Size</button>
-        </div>
+        <div id="ContainerForms"></div>
     </div>
 
     <div id="ContainerDetail">
@@ -89,12 +74,10 @@
     </div>
 
     <div id="boxContent" class="boxContent">
-        <h3>
+        <h3 style="margin-left: 5px;">
             Box
             <i class="bi bi-plus-square-fill" onclick="addBox()"
-                style="cursor: pointer; font-size: 25px; margin-left: 158px;"></i>
-            <i class="bi bi-funnel-fill" onclick="detailToggle('ContainerDetail')"
-                style="cursor: pointer; font-size: 30px; margin-left: 18px;"></i>
+                style="cursor: pointer; font-size: 25px; margin-left: 210px;"></i>
         </h3>
     </div>
 
@@ -118,13 +101,11 @@
     </button>
     <div id="FooterContent">
         <div id="footerContent">
-            <p>อ่านทำไมเบ๋อ | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            <div id="FooterDetails" style="margin-top: -10px;"></div>
         </div>
     </div>
 
-    <button id="manageButton" onclick="manageAction()">
-        Manage
-    </button>
+    <button id="manageButton" onclick="manageAction()">Manage</button>
 
 
     <script>
@@ -139,6 +120,7 @@
             }
         });
     </script>
+    <script src="/Js/containers.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://threejs.org/examples/js/loaders/FontLoader.js"></script>
     <script src="https://threejs.org/examples/js/geometries/TextGeometry.js"></script>
@@ -147,6 +129,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="/js/app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 
 </html>

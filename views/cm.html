@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <title>3D Container Organizer</title>
+</head>
+<body>
+    <div id="loadingScreen">
+        <i class="fas fa-spinner spinner"></i>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img src="images/logo.png" alt="Logo" id="logo"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button class="btn btn-light" onclick="toggleFlux('ContainerContent')">Container</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-light" onclick="toggleFlux('boxContent')">Box</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-light" onclick="toggleFlux('listContent')">List</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-light" onclick="toggleFlux('backupContent')">Backup</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="ContainerContent">
+        <h3>
+            Container 
+            <i class="bi bi-filter-left" onclick="detailToggle('ContainerDetail')" style="cursor: pointer; font-size: 35px; margin-left: 125px;"></i>
+        </h3>
+        <div id="ContainerForms"></div>
+        <!--<div id="cubeControl">
+            <div class="form-group">
+                <label for="width">Width:</label>   
+                <input type="number" id="cwidth" class="form-control" value="1" />
+            </div>
+            <div class="form-group">
+                <label for="Height">Length:</label>
+                <input type="number" id="clength" class="form-control" value="3" />
+            </div>
+            <div class="form-group">
+                <label for="Length">Height:</label>
+                <input type="number" id="cheight" class="form-control" value="1" />
+            </div>
+            <button class="btn btn-primary" onclick="updateCubeSize()">Update Cube Size</button>
+        </div>-->
+        
+    </div>
+
+    <div id="ContainerDetail">
+        <h3>DetailContainer</h3>
+    </div>
+    
+    <div id="boxContent" class="boxContent">
+        <h3>
+            Box 
+            <i class="bi bi-plus-square-fill" onclick="addBox()" style="cursor: pointer; font-size: 25px; margin-left: 158px;"></i> 
+            <i class="bi bi-funnel-fill" onclick="detailToggle('ContainerDetail')" style="cursor: pointer; font-size: 30px; margin-left: 18px;"></i>
+        </h3>
+    </div>
+    
+
+    <div id="BoxDetail">
+        <h3>BoxDetail</h3>
+    </div>
+
+    <div id="listContent">
+        <h3>List <i class="bi bi-chevron-bar-up"onclick="toggleFlux('listContent')" style="cursor: pointer"></i></h3>
+        <p>เนื้อหาของ List จะแสดงที่นี่เมื่อกดปุ่ม "List".</p>
+    </div>
+
+    <div id="backupContent">
+        <h3>Backup <i class="bi bi-chevron-bar-up"onclick="toggleFlux('BackupContent')" style="cursor: pointer"></i></h3>
+        <p>เนื้อหาของ Backup จะแสดงที่นี่เมื่อกดปุ่ม "Backup".</p>
+    </div>
+    <button id="toggleButton" onclick="toggleIcon()">
+        <i class="bi bi-caret-up-fill" id="toggleIcon"></i>
+    </button>
+    <div id="FooterContent">
+        <div id="footerContent">
+            <div id="FooterDetails" style="margin-top: -10px;"></div>
+        </div>
+    </div>    
+    
+    <button id="manageButton" onclick="manageAction()">Manage</button>
+
+    <script src="/Js/containers.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://threejs.org/examples/js/geometries/TextGeometry.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="/Js/app.js"></script>
+</body>
+</html>

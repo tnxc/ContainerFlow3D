@@ -137,7 +137,7 @@ html {
 }
 
 .active-btn {
-    background-color: #ffffff;
+    background-color: #007BFF;
     /* ตัวอย่างสีปุ่มที่ active */
     color: #fff;
 }
@@ -214,6 +214,11 @@ nav {
     border-radius: 5px;
     transition: bottom 0.5s ease;
     /* เพิ่มการแอนิเมชันให้ฟุตเตอร์ */
+}
+
+#FooterContent.show {
+    bottom: 0;
+    /* แสดงฟุตเตอร์ */
 }
 
 #toggleButton {
@@ -312,7 +317,6 @@ nav {
     transform: translateX(-50%);
     padding: 20px;
     background-color: #fff;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     width: 300px;
     z-index: 20;
@@ -349,6 +353,100 @@ nav {
     background-color: #0056b3;
 }
 
+.container-form h4 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.container-form label {
+    display: block;
+    /* แสดงเป็นบรรทัดใหม่ */
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.container-form input {
+    width: calc(100% - 20px);
+    /* ปรับขนาดให้พอดีกับฟอร์ม */
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.container-wrapper button {
+    background-color: #4CAF50;
+    /* ปุ่มสีเขียว */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.container-form button:hover {
+    background-color: #45a049;
+    /* สีเข้มขึ้นเมื่อ hover */
+}
+
+/* เพิ่มการจัดวางในหน้า */
+#ContainerForms {
+    max-width: 600px;
+    margin: 0 auto;
+    /* กึ่งกลางหน้า */
+}
+
+.hidden {
+    display: none;
+}
+
+.container-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 10px 0;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.container-display,
+.container-form {
+    margin: 0;
+    padding: 0;
+}
+
+.container-wrapper:hover {
+    background-color: #f9f9f9;
+}
+
+button {
+    cursor: pointer;
+}
+
+.box:hover {
+    background-color: #f1f1f1;
+}
+
+.dimensions {
+    display: flex;
+    gap: 10px;
+    /* ระยะห่างระหว่างแต่ละค่า */
+}
+
+.dimensions p {
+    margin: 0;
+    /* ลบระยะห่างของ <p> */
+}
+
+.container-wrapper {
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
 .navbar .logoname {
     font-size: 32px;
 }
@@ -360,4 +458,3 @@ nav {
 .navbar .logoname .textright {
     color: #6a98b3;
 }
-
