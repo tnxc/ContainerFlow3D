@@ -9,6 +9,7 @@
 
     <!-- Bootstrap Css -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/index.css">
 </head>
 
@@ -67,22 +68,97 @@
             </div>
         </div>
 
-        <div class="row flex-lg-row-reverse align-items-center g-5 py-5 mx-lg-3">
-            <div class="col-10 col-sm-8 col-lg-6">
-                <h1 class="display-5 fw-bold lh-1 mb-3">Responsive left-aligned hero with image</h1>
-                <p class="lead">Quickly design and customize responsive mobile-first sites with Bootstrap, the world’s
-                    most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid
-                    system, extensive prebuilt components, and powerful JavaScript plugins.</p>
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                    <button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Primary</button>
-                    <button type="button" class="btn btn-outline-secondary btn-lg px-4">Default</button>
+        <div class="container mt-2 mb-4" id="icon-grid">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                <div class="col d-flex">
+                    <i class="bi bi-box-seam text-primary flex-shrink-0 me-3" style="font-size: 1.75em;"></i>
+                    <div>
+                        <h3 class="fw-bold fs-4 text-body-wight">Reduce Logistics Costs</h3>
+                        <p>Streamline your operations and cut down on unnecessary expenses with smarter container
+                            management.</p>
+                    </div>
+                </div>
+                <div class="col d-flex">
+                    <i class="bi bi-gear-fill text-success flex-shrink-0 me-3" style="font-size: 1.75em;"></i>
+                    <div>
+                        <h3 class="fw-bold fs-4 text-body-wight">Adapt to Businesses of All Sizes</h3>
+                        <p>Scalable solutions designed to fit the needs of small, medium, and large enterprises.</p>
+                    </div>
+                </div>
+                <div class="col d-flex">
+                    <i class="bi bi-people-fill text-warning flex-shrink-0 me-3" style="font-size: 1.75em;"></i>
+                    <div>
+                        <h3 class="fw-bold fs-4 text-body-wight">Support Team Collaboration</h3>
+                        <p>Enable seamless teamwork with tools built to optimize team efficiency and coordination.</p>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <div class="row flex-lg-row-reverse align-items-center g-5 py-5 mx-lg-3">
+            <div class="col-10 col-sm-8 col-lg-6">
+                <h1 class="display-5 fw-bold lh-1 mb-3">3D Rendering Example of a Container with Grid Lines to Show
+                    Dimensions and Arrangement</h1>
+                <p class="lead">This image shows a 3D rendering of an empty container with grid lines to indicate
+                    dimensions and spacing. The visualization highlights the internal capacity and structure of the
+                    container, which can be useful for cargo or logistics management. The axes are labeled to
+                    demonstrate the dimensions in a structured and scalable format.</p>
+            </div>
             <div class="col-lg-6">
-                <img src="/img/image.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="700"
+                <img src="/img/containerex.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="600"
                     height="500" loading="lazy">
             </div>
         </div>
+        
+        <!-- footer -->
+        <div class="container">
+            <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 border-top h-auto">
+                <div class="col mb-3">
+                    <a href="/" class="d-flex align-items-center mb-3 link-body-emphasis text-decoration-none">
+                        <img class="rounded" src="/img/logodoc.png" alt="" width="30%">
+                    </a>
+                    <p class="">© 2024 Company, Inc</p>
+                </div>
+
+                <div class="col mb-3">
+                </div>
+
+                <div class="col mb-3 text-white">
+                    <h5>About Us</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2"><a href="/about"
+                                class="nav-link-footer p-0 text-white text-decoration-none">About</a></li>
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="col mb-3">
+                    <h5>Legal</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Terms of Use</a></li>
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col mb-3">
+                    <h5>Socials</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Twitter</a></li>
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Facebook</a></li>
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Instagram</a></li>
+                        <li class="nav-item mb-2"><a href="#"
+                                class="nav-link-footer p-0 text-white text-decoration-none">Youtube</a></li>
+                    </ul>
+                </div>
+            </footer>
+        </div>
+        <!-- End footer -->
     </section>
     <!-- End Hero section -->
 
