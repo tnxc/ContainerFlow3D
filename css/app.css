@@ -333,11 +333,11 @@ nav {
 
 #manageButton {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
-    background-color: #007bff;
+    bottom: 60px;
+    right: 60px;
+    width: 120px;
+    height: 120px;
+    background-color: #2196F3;
     color: white;
     border-radius: 50%;
     border: none;
@@ -350,7 +350,7 @@ nav {
 }
 
 #manageButton:hover {
-    background-color: #0056b3;
+    background-color: #1565C0;
 }
 
 .container-form h4 {
@@ -382,6 +382,7 @@ nav {
     color: white;
     border: none;
     padding: 10px 20px;
+    margin-top: 10px;
     border-radius: 5px;
     cursor: pointer;
 }
@@ -430,8 +431,6 @@ button {
 
 .dimensions {
     display: flex;
-    gap: 10px;
-    /* ระยะห่างระหว่างแต่ละค่า */
 }
 
 .dimensions p {

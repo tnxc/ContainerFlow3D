@@ -91,7 +91,6 @@
 }
 
 .hero-section .row {
-    height: 100vh;
     z-index: 1;
     position: relative;
     color: #fff;
@@ -124,4 +123,9 @@
 /* logo */
 .navbar .container-fluid img {
     width: 70px;
+}
+
+.hero-section .album .row .col {
+    z-index: 1;
+    position: relative;
 }
