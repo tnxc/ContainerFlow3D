@@ -79,28 +79,25 @@
                     <form id="updateForm">
                         <div class="mb-3">
                             <label for="firstname" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstname" placeholder="Enter your first name">
+                            <input type="text" class="form-control" id="firstname" placeholder="">
                         </div>
                         <div class="mb-3">
                             <label for="lastname" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastname" placeholder="Enter your last name">
+                            <input type="text" class="form-control" id="lastname" placeholder="">
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Change Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Enter new password">
+                            <input type="password" class="form-control" id="password" placeholder="">
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirmPassword"
-                                placeholder="Confirm new password">
+                            <input type="password" class="form-control" id="confirmPassword" placeholder="">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">
-                        <a href="" style="color: white; text-decoration: none;" onclick="handleUpdate()">Update</a>
-                    </button>
+                    <button type="button" class="btn btn-primary" onclick="handleUpdate()">Update</button>
                 </div>
             </div>
         </div>
@@ -162,6 +159,59 @@
                 userDropdownLink.textContent = userName;  // แสดงชื่อผู้ใช้ที่ล็อกอิน
             }
         });
+    </script>
+    <script>
+        async function handleUpdate() {
+            const firstname = document.getElementById('firstname').value;
+            const lastname = document.getElementById('lastname').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            const button = document.querySelector('button[onclick="handleUpdate()"]');
+            button.disabled = true;
+            button.textContent = 'Updating...';
+
+            try {
+                const response = await fetch('/user/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstname, lastname, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    // อัพเดตสำเร็จ
+                    alert('Update successful!');
+
+                    // ปิด Modal
+                    const modal = document.querySelector('#staticBackdrop');
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    modalInstance.hide();
+
+                    // อัพเดต Dropdown ด้วยชื่อใหม่
+                    const userDropdownLink = document.querySelector('#userDropdown');
+                    if (userDropdownLink) {
+                        userDropdownLink.textContent = `${firstname} ${lastname}`;
+                    }
+
+                    // รีเซ็ตฟอร์ม (ถ้าจำเป็น)
+                    document.getElementById('updateForm').reset();
+                } else {
+                    alert(data.error || 'Update failed');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while updating.');
+            } finally {
+                button.textContent = 'Update';
+                button.disabled = false;
+            }
+        }
     </script>
     <script src="/Js/containers.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

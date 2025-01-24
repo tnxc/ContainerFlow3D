@@ -18,13 +18,13 @@ module.exports = (req, res) => {
                     // รีไดเร็กต์ไปยังหน้า Dashboard
                     res.redirect('/dashboard');
                 } else {
-                    // หากรหัสผ่านไม่ตรง ให้กลับไปที่หน้า Login
-                    req.flash('error', 'Incorrect password.');
+                    // หากรหัสผ่านไม่ตรง ให้กลับไปที่หน้า Login พร้อมข้อความแจ้งเตือน
+                    req.flash('error', 'Incorrect password. Please try again.');
                     res.redirect('/login');
                 }
             } else {
-                // หากไม่พบผู้ใช้ ให้กลับไปที่หน้า Login
-                req.flash('error', 'User not found.');
+                // หากไม่พบผู้ใช้ ให้กลับไปที่หน้า Login พร้อมข้อความแจ้งเตือน
+                req.flash('error', 'User not found. Please check your email.');
                 res.redirect('/login');
             }
         })

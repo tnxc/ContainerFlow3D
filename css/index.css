@@ -125,7 +125,9 @@
     width: 70px;
 }
 
-.hero-section .album .row .col {
+.hero-section .px-4 {
     z-index: 1;
     position: relative;
+    color: #fff;
 }
+

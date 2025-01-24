@@ -1,19 +1,10 @@
 #report-container {
     float: left;
-    width: 50%;  /* คุณสามารถปรับขนาดได้ตามต้องการ */
-    padding: 20px;
-}
-.navbar .logoname {
-    font-size: 32px;
+    width: 50%;
+    padding-left: 50px;
+    padding-top: 20px;
 }
 
-.navbar .logoname .textleft {
-    color: #6c757d;
-}
-
-.navbar .logoname .textright {
-    color: #6a98b3;
-}
 nav {
     position: fixed;
     top: 0;
@@ -24,4 +15,8 @@ nav {
     padding: 10px 0;
     height: 90px;
     /* กำหนดความสูงของ navbar เป็น 80px */
+}
+
+.navbar .container-fluid .btn {
+    margin-right: 20px;
 }
