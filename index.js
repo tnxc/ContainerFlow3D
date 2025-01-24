@@ -22,6 +22,7 @@ const loginUserController = require('./controllers/loginUserController')
 const logoutController = require('./controllers/logoutController')
 const dashboardController = require('./controllers/dashboardController')
 const reportController = require('./controllers/reportController')
+const updateUserController = require('./controllers/updateUserController');
 
 //middleware
 const pathMiddleware = require('./middleware/pathMiddleware')
@@ -57,6 +58,7 @@ app.post('/user/login' , redirectifAuth , loginUserController)
 app.get('/logout', logoutController)
 app.get('/dashboard' , authMiddleware ,dashboardController)
 app.get('/report' , reportController)
+app.put('/user/update', authMiddleware, updateUserController);
 
 app.listen(10000, () =>{
     console.log("app listening on http://localhost:10000")

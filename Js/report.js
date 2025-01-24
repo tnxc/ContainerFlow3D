@@ -22,11 +22,10 @@ function showReport() {
         // สร้างตารางสำหรับแสดงข้อมูลกล่อง
         let boxesTable = `
             <h3>Placed Boxes</h3>
-            <table border="1" cellpadding="5" cellspacing="0">
+            <table border="1" cellpadding="10" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>ID</th>
+                        <th>Box name</th>
                         <th>Count</th>
                         <th>Width</th>
                         <th>Length</th>
@@ -62,14 +61,13 @@ function showReport() {
         maxCountBoxes.forEach((box, index) => {
             boxesTable += `
                 <tr>
-                    <td>${index + 1}</td>
                     <td>${box.id}</td>
                     <td>${box.count}</td>
                     <td>${box.width}</td>
                     <td>${box.length}</td>
                     <td>${box.height}</td>
                     <td>${box.weight}</td>
-                    <td style="background-color: ${box.color}; color: #fff;">${box.color}</td>
+                    <td style="background-color: ${box.color}; color: #fff;"></td>
                 </tr>
             `;
         });
@@ -109,9 +107,6 @@ function showReport() {
         console.error("No container data found for currentContainerId.");
     }
 }
-
-
-
 
 function hideNavAndPrint() {
     // ซ่อนส่วนที่เป็น nav

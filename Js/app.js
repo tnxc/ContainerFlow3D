@@ -32,7 +32,7 @@ const gridSize = 300;
 const gridDivisions = gridSize / 5; 
 const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xe3e3e3, 0xe3e3e3); // กริดสีฟ้า
 gridHelper.rotation.y = -Math.PI / 2; 
-gridHelper.position.y = -2.5;
+gridHelper.position.y = 0;
 gridHelper.position.x = -2.5;
 gridHelper.position.z = -2.5;
 scene.add(gridHelper);
@@ -173,6 +173,7 @@ function updateCubeSize(containerId) {
     const newLength = parseFloat(document.getElementById(`clength-${containerId}`).value);
     const newHeight = parseFloat(document.getElementById(`cheight-${containerId}`).value);
     const newWidth = parseFloat(document.getElementById(`cwidth-${containerId}`).value);
+    
 
     // คูณค่าทั้งสามก่อนใช้งาน
     const multipliedWidth = newLength * 5;  // คุณสามารถปรับค่า 5 ตามต้องการ
@@ -182,6 +183,10 @@ function updateCubeSize(containerId) {
     // ปรับขนาด Cube ตามค่าที่คูณแล้ว
     cube.geometry.dispose();
     cube.geometry = new THREE.BoxGeometry(multipliedWidth, multipliedHeight, multipliedDepth);
+    // แสดงค่าของตัวแปรใน console
+    console.log("multipliedWidth: ", multipliedWidth);
+    console.log("multipliedHeight: ", multipliedHeight);
+    console.log("multipliedDepth: ", multipliedDepth);
     cube.position.y = gridHelper.position.y + multipliedHeight / 2;
 
     line.geometry.dispose();
@@ -232,6 +237,7 @@ function updateCubeSize(containerId) {
     // เรียก footerDetails เพื่ออัปเดตข้อมูลใน footer
     footerDetails(containerId);
     manageAction();
+    placeBoxesFromInside(containerId,multipliedWidth, multipliedHeight, multipliedDepth)
 
 }
 
@@ -647,8 +653,8 @@ function addBox() {
     const boxContent = document.createElement("div");
     boxContent.innerHTML = `
         <div><strong>${defaultID}</strong></div>
-        <div>Width: 1.00 m, Length: 1.00 m, Height: 1.00 m</div>
-        <div>Weight: 10.0 kg, Quantity: 1 unit</div>
+        <div>Width: 0.2 m, Length: 0.2 m, Height: 0.2 m</div>
+        <div>Weight: 10.0 kg, Quantity: 14 unit</div>
         <div>Color: ${randomColor}</div> <!-- แสดงสีสุ่ม -->
     `;
     newBox.appendChild(boxContent);
@@ -664,11 +670,11 @@ function addBox() {
 
     // สร้าง input fields สำหรับแก้ไขข้อมูล
     const idInput = createInput('Box ID:', defaultID); // Input สำหรับเปลี่ยน ID
-    const widthInput = createInput('Width :', '1');
-    const lengthInput = createInput('Length :', '1');
-    const heightInput = createInput('Height :', '1');
+    const widthInput = createInput('Width :', '0.2');
+    const lengthInput = createInput('Length :', '0.2');
+    const heightInput = createInput('Height :', '0.2');
     const weightInput = createInput('Weight :', '10');
-    const quantityInput = createInput('Quantity :', '1');
+    const quantityInput = createInput('Quantity :', '14');
     const colorInput = createColorInput('Color :', randomColor); // เพิ่ม input สีพร้อมค่าเริ่มต้นเป็นสีสุ่ม
 
     // สร้างปุ่มบันทึกและลบ
@@ -875,10 +881,56 @@ function manageAction() {
     placeBoxesFromInside(boxDataArray);
 }
 
-function create3DModel(width, length, height, x, y, z,color) {
+function create3DModel(width, length, height, x, y, z, color, boxId) {
+    // ฟังก์ชันสร้างพื้นผิวข้อความพร้อมพื้นหลัง
+    function createTextTexture(text, boxColor, fontSize) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        canvas.width = 512;
+        canvas.height = 512;
+
+        // เติมสีพื้นหลังให้เหมือนกล่อง
+        context.fillStyle = boxColor; // ใช้สีเดียวกับกล่อง
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // ตั้งค่าฟอนต์และสีของข้อความ
+        context.font = `bold ${fontSize || 64}px Arial`;
+        context.fillStyle = '#000000'; // สีของตัวอักษร (ดำ)
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+
+        // วาดข้อความไว้ตรงกลาง Canvas
+        context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+        // สร้าง Texture จาก Canvas
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+
+        return texture;
+    }
+
+    // สร้างพื้นผิวข้อความด้วยชื่อ boxId สำหรับแต่ละด้าน
+    const textTextureFront = createTextTexture(boxId, color,128);  // ด้านหน้า
+    const textTextureBack = createTextTexture(boxId, color, 128);   // ด้านหลัง
+    const textTextureTop = createTextTexture(boxId, color, 128);    // ด้านบน
+    const textTextureBottom = createTextTexture(boxId, color, 128); // ด้านล่าง
+    const textTextureLeft = createTextTexture(boxId, color, 128);   // ด้านซ้าย
+    const textTextureRight = createTextTexture(boxId, color, 128);  // ด้านขวา
+
+    // สร้างวัสดุสำหรับแต่ละด้านของกล่อง
+    const materials = [
+        new THREE.MeshBasicMaterial({ map: textTextureFront }),  // ด้านหน้า
+        new THREE.MeshBasicMaterial({ map: textTextureBack }),   // ด้านหลัง
+        new THREE.MeshBasicMaterial({ map: textTextureTop }),    // ด้านบน
+        new THREE.MeshBasicMaterial({ map: textTextureBottom }), // ด้านล่าง
+        new THREE.MeshBasicMaterial({ map: textTextureLeft }),   // ด้านซ้าย
+        new THREE.MeshBasicMaterial({ map: textTextureRight }),  // ด้านขวา
+    ];
+
+    // สร้างกล่อง
     const geometry = new THREE.BoxGeometry(width, height, length);
-    const material = new THREE.MeshBasicMaterial({ color: color }); // ใช้ค่าสีจากพารามิเตอร์
-    const cube = new THREE.Mesh(geometry, material);
+    const cube = new THREE.Mesh(geometry, materials);
 
     cube.position.set(x, y + height / 2, z);
 
@@ -893,6 +945,7 @@ function create3DModel(width, length, height, x, y, z,color) {
     createdModels.push(cube);
     createdModels.push(line);
 }
+
 
 
 function clearPreviousModels() {
@@ -945,6 +998,17 @@ function placeBoxesFromInside(boxes) {
         console.error("No container selected. Please load a container first.");
         return;
     }
+    // ตรวจสอบว่า boxes เป็นอาร์เรย์
+    if (!Array.isArray(boxes)) {
+        console.error("The provided boxes parameter is not an array:", boxes);
+        return;
+    }
+
+    // ตรวจสอบว่ามีข้อมูลใน boxes หรือไม่
+    if (boxes.length === 0) {
+        console.warn("No boxes provided to place.");
+        return;
+    }
 
     const container = containerData.find(c => c.id === currentContainerId);
     if (!container) {
@@ -953,15 +1017,17 @@ function placeBoxesFromInside(boxes) {
     }
 
     const ConWidth = container.length * 5;
-    const ConHeight = container.height * 5;
+    const ConHeight = container.height * 5; 
     const ConDepth = container.width * 5;
     const ConCap = container.weightCapacity;
     let totalWeight = 0; // น้ำหนักรวมของกล่องทั้งหมด
     let placedBoxes = 0; // ตัวแปรสำหรับเก็บจำนวนกล่องที่วางได้
     let unplacedBoxes = 0; // ตัวแปรสำหรับเก็บจำนวนกล่องที่วางไม่ได้
-    console.log(`Place - Width: ${container.width}, Length: ${container.height}, Height: ${container.length}, Cap: ${container.weightCapacity}`);
-    console.log(`Place - Width: ${ConWidth}, Length: ${ConDepth}, Height: ${ConHeight}, Cap: ${ConCap}, TotalCap: ${totalWeight}`);
+    console.log(`PlaceEiEi - Width: ${container.width}, Length: ${container.height}, Height: ${container.length}, Cap: ${container.weightCapacity}`);
+    console.log(`PlaceAiAi - Width: ${ConWidth}, Length: ${ConDepth}, Height: ${ConHeight}, Cap: ${ConCap}, TotalCap: ${totalWeight}`);
     console.log(`Placing boxes inside container ID: ${currentContainerId}`);
+    console.log(`เช็คหน่อยConWidth: ${ConWidth}, ConHeight: ${ConHeight}, ConDepth: ${ConDepth}`);
+
 
     const occupiedSpace = []; // เก็บพื้นที่ที่ถูกใช้งาน
     const placedBoxesData = []; // เก็บข้อมูลของกล่องที่วางได้
@@ -969,12 +1035,12 @@ function placeBoxesFromInside(boxes) {
     let currentX = -ConWidth / 2;
     let currentY = gridHelper.position.y;
     let currentZ = -ConDepth / 2;
-
+    
     // เรียงลำดับกล่องจากขนาดใหญ่ไปเล็ก
     boxes.sort((a, b) => (b.width * b.length * b.height) - (a.width * a.length * a.height));
 
         boxes.forEach((box) => {
-            const boxId = box.boxId; // ดึง Box ID
+            const boxId = box.boxId; // ดึง Box ID 
             const boxWidth = parseFloat(box.width) * 5;
             const boxLength = parseFloat(box.length) * 5;
             const boxHeight = parseFloat(box.height) * 5;
@@ -1006,7 +1072,7 @@ function placeBoxesFromInside(boxes) {
                         const newZ = baseZ + zOffset;
 
                         // ตรวจสอบขอบเขตไม่ให้กล่องเกินคอนเทนเนอร์
-                        if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight / 2) {
+                        if (newX + boxWidth <= ConWidth && newZ + boxLength <= ConDepth && baseY + boxHeight <= ConHeight) {
                             const collision = occupiedSpace.some((space) =>
                                 newX < space.x + space.width &&
                                 newX + boxWidth > space.x &&
@@ -1025,7 +1091,8 @@ function placeBoxesFromInside(boxes) {
                                     newX + boxWidth / 2,
                                     baseY,
                                     newZ + boxLength / 2,
-                                    boxColor // ส่งสีไปยัง create3DModel
+                                    boxColor, // ส่งสีไปยัง create3DModel
+                                    boxId
                                 );
                                 // อัปเดตน้ำหนักรวม
                                 totalWeight += boxWeight;
@@ -1057,7 +1124,9 @@ function placeBoxesFromInside(boxes) {
             if (!placed) {
                 for (let x = currentX; x + boxWidth <= ConWidth / 2; x += boxWidth) {
                     for (let z = currentZ; z + boxLength <= ConDepth / 2; z += boxLength) {
-                        for (let y = currentY; y + boxHeight <= ConHeight / 2; y += boxHeight) {
+                        for (let y = currentY; y + boxHeight <= ConHeight; y += boxHeight) {
+                            console.log(`YB :${y + boxHeight}, y :${y} , boxHeight${boxHeight}`);
+                            console.log(`currentY: ${currentY}, y: ${y}, y + boxHeight: ${y + boxHeight}`);
                             const collision = occupiedSpace.some((space) =>
                                 x < space.x + space.width &&
                                 x + boxWidth > space.x &&
@@ -1066,17 +1135,19 @@ function placeBoxesFromInside(boxes) {
                                 y < space.y + space.height &&
                                 y + boxHeight > space.y
                             );
+                            console.log(`collision=${collision}`);
 
                             
-                            if (x + boxWidth <= ConWidth / 2 && z + boxLength <= ConDepth / 2 && y + boxHeight <= ConHeight / 2 && !collision) {
+                            if (x + boxWidth <= ConWidth / 2 && z + boxLength <= ConDepth / 2 && y + boxHeight <= ConHeight && !collision) {
                                 create3DModel(
                                     boxWidth,
                                     boxLength,
                                     boxHeight,
                                     x + boxWidth / 2,
-                                    y,
+                                    y ,
                                     z + boxLength / 2,
-                                    boxColor 
+                                    boxColor , // ส่งสีไปยัง create3DModel
+                                    boxId
                                 );
 
                                 occupiedSpace.push({
@@ -1125,14 +1196,14 @@ function placeBoxesFromInside(boxes) {
                     const baseZ = baseBox.z;
 
                     // ตรวจสอบว่าเราสามารถเพิ่มคอลัมน์ได้
-                    if (baseY + boxHeight <= ConHeight / 2) {
+                    if (baseY + boxHeight <= ConHeight) {
                         for (let xOffset = 0; xOffset + boxWidth <= baseBox.width; xOffset += boxWidth) {
                             for (let zOffset = 0; zOffset + boxLength <= baseBox.length; zOffset += boxLength) {
                                 const newX = baseX + xOffset;
                                 const newZ = baseZ + zOffset;
 
                                 // ตรวจสอบขอบเขตไม่ให้กล่องเกินคอนเทนเนอร์
-                                if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight / 2) {
+                                if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight) {
                                     const collision = occupiedSpace.some((space) =>
                                         newX < space.x + space.width &&
                                         newX + boxWidth > space.x &&
@@ -1197,14 +1268,10 @@ function placeBoxesFromInside(boxes) {
     // หลังจากเก็บข้อมูลแล้ว สามารถดึงข้อมูลออกมาแสดงใน console ได้
     const storedData = JSON.parse(sessionStorage.getItem("placedBoxesData"));
     console.log("ข้อมูลที่เก็บไว้ใน sessionStorage:", storedData);
-    // แสดงผลรวมใน console
 
     console.log(`จำนวนกล่องที่วางได้: ${placedBoxes}`);
     console.log(`จำนวนกล่องที่วางไม่ได้: ${unplacedBoxes}`);
-    console.log(`Box ID: ${box.id}`);
-    // เรียกฟังก์ชัน footerDetails พร้อมส่งค่าตัวแปร
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
