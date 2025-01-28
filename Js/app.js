@@ -1,11 +1,8 @@
 window.onload = function() {
     camera.position.set(20, 20, 20);
     controls.update();
-    
-    // เรียกใช้ updateRulerX หลังจากสร้าง cube เสร็จ
     updateRulerX();
 };
-
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color("#edeff0");
@@ -142,7 +139,6 @@ function toggleIcon() {
     }
 }
 
-
 // สร้างกล่อง (Cube) พร้อมความโปร่งใส
 const geometry = new THREE.BoxGeometry(15,5,5);
 const material = new THREE.MeshBasicMaterial({ color: 0xcfd8ff, transparent: true, opacity: 0.5 });
@@ -163,9 +159,6 @@ const darkerCubeGeometry = new THREE.BoxGeometry(15, 0.05, 5); // ขนาด y
 const darkerCube = new THREE.Mesh(darkerCubeGeometry, darkerMaterial);
 darkerCube.position.set(0, gridHelper.position.y -0.0245, 0); // เริ่มต้นใต้ Grid
 scene.add(darkerCube);
-
-
-
 
 function updateCubeSize(containerId) {
     // ดึงค่าจาก input โดยอิงตาม containerId
@@ -240,10 +233,6 @@ function updateCubeSize(containerId) {
     placeBoxesFromInside(containerId,multipliedWidth, multipliedHeight, multipliedDepth)
 
 }
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function updateRulerX() {
     // ลบกลุ่มไม้บรรทัดเก่า
@@ -363,8 +352,6 @@ function createRulerText(size, line) {
 }
 
 updateRulerX();
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function updateRulerY() {
     // ลบกลุ่มไม้บรรทัดเก่า
@@ -488,8 +475,6 @@ function createRulerTextY(size, line) {
 
 updateRulerY();
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 function updateRulerZ() {
     // ลบกลุ่มไม้บรรทัดเก่า
     if (scene.getObjectByName("rulerGroupZ")) {
@@ -608,161 +593,161 @@ function createRulerTextZ(size, line) {
 }
 
 updateRulerZ();
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-let boxCounter = 1; // ตัวแปรสำหรับนับจำนวน box
+let boxCounter = 1;
 
 function getRandomColor() {
-    const letters = '0123456789abcdef';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    const getValidValue = (excludedValues) => {
+        let value;
+        do {
+            value = Math.floor(Math.random() * 156) + 100; // ค่าสุ่มระหว่าง 100-255
+        } while (excludedValues.some(excluded => Math.abs(value - excluded) < 50)); // ตรวจสอบความต่างอย่างน้อย 50
+        return value;
+    };
+
+    // สุ่มตำแหน่งที่กำหนดเป็น 255
+    const fixed255Index = Math.floor(Math.random() * 3);
+
+    // สร้าง RGB
+    const rgb = [0, 0, 0];
+    rgb[fixed255Index] = 255; // ช่องที่กำหนดค่าเป็น 255
+    const otherIndexes = [0, 1, 2].filter(index => index !== fixed255Index);
+
+    // กำหนดค่าสีที่เหลือโดยตรวจสอบความต่างอย่างน้อย 50
+    rgb[otherIndexes[0]] = getValidValue([rgb[fixed255Index]]); // ช่องที่สอง
+    rgb[otherIndexes[1]] = getValidValue([rgb[fixed255Index], rgb[otherIndexes[0]]]); // ช่องที่สาม
+
+    // แปลงค่า RGB เป็น HEX
+    const color = rgb.map(value => value.toString(16).padStart(2, '0')).join('');
+    return `#${color}`;
 }
 
 function addBox() {
 
-    // สร้างสีสุ่ม
     const randomColor = getRandomColor();
-
-    // สร้าง div ใหม่สำหรับฟอร์ม
     const newBox = document.createElement("div");
     newBox.className = "box";
-    const defaultID = `Box ${boxCounter}`; // ใช้ "Box" แทน "box" และเพิ่มช่องว่าง
-    newBox.setAttribute('data-box-id', defaultID); // เพิ่ม ID เริ่มต้น
-    newBox.id = defaultID; // ตั้งค่า id ให้กล่อง
-    
-    // กำหนดสไตล์ให้กับ newBox
-    newBox.style.margin = "15px 0";
-    newBox.style.padding = "15px";
+    const defaultID = `Box ${boxCounter}`;
+    newBox.setAttribute('data-box-id', defaultID);
+    newBox.id = defaultID;
+
+    newBox.style.margin = "10px 0";
+    newBox.style.padding = "20px";
     newBox.style.border = "1px solid #ccc";
     newBox.style.borderRadius = "5px";
-    newBox.style.backgroundColor = "#f9f9f9";
+    newBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)"; // เพิ่มเงาให้ดูนุ่มนวล
+    newBox.style.background = `linear-gradient(to right, #ffffff 90%, ${randomColor} 10%)`;
+    newBox.style.borderTopRightRadius = "15px";
+    newBox.style.borderBottomRightRadius = "15px";
     newBox.style.cursor = "pointer";
-    // เพิ่มเหตุการณ์ mouseover และ mouseout เพื่อเปลี่ยนสีพื้นหลัง
-    newBox.addEventListener('mouseover', function() {
-        newBox.style.backgroundColor = "#e0e0e0";  // เปลี่ยนสีพื้นหลังเมื่อเมาส์ชี้
-    });
+    newBox.style.position = "relative"; // สำหรับจัดตำแหน่งแถบสี
 
-    newBox.addEventListener('mouseout', function() {
-        newBox.style.backgroundColor = "#f9f9f9";  // คืนค่าสีพื้นหลังเมื่อเมาส์ออก
-    });
-
-    // ข้อมูลที่แสดงใน box
     const boxContent = document.createElement("div");
+    boxContent.style.marginRight = "50px";
     boxContent.innerHTML = `
-        <div><strong>${defaultID}</strong></div>
-        <div>Width: 0.2 m, Length: 0.2 m, Height: 0.2 m</div>
-        <div>Weight: 10.0 kg, Quantity: 14 unit</div>
-        <div>Color: ${randomColor}</div> <!-- แสดงสีสุ่ม -->
+        <div style="font-family: 'Arial', sans-serif; color: #333;"><strong>${defaultID}</strong></div>
+        <div style="font-family: 'Arial', sans-serif; font-size:16px; color: #666;">50cm x 50cm x 50cm x 100kg x 1unit</div>
     `;
     newBox.appendChild(boxContent);
-
-    // เพิ่ม newBox เข้าไปใน div boxContent
     document.getElementById("boxContent").appendChild(newBox);
-
-    // สร้าง div สำหรับฟอร์มแก้ไข
     const editForm = document.createElement("div");
     editForm.className = "editForm";
-    editForm.style.display = "none"; // ซ่อนไว้ก่อน
+    editForm.style.display = "none";
+    editForm.style.marginLeft = "50px"; 
+    editForm.style.marginTop = "15px";
     newBox.appendChild(editForm);
 
     // สร้าง input fields สำหรับแก้ไขข้อมูล
-    const idInput = createInput('Box ID:', defaultID); // Input สำหรับเปลี่ยน ID
-    const widthInput = createInput('Width :', '0.2');
-    const lengthInput = createInput('Length :', '0.2');
-    const heightInput = createInput('Height :', '0.2');
-    const weightInput = createInput('Weight :', '10');
-    const quantityInput = createInput('Quantity :', '14');
-    const colorInput = createColorInput('Color :', randomColor); // เพิ่ม input สีพร้อมค่าเริ่มต้นเป็นสีสุ่ม
+    const idInput = createInput('Item Name:', defaultID);
+    const widthInput = createInput('Width(cm):', '50');
+    const lengthInput = createInput('Length(cm):', '50');
+    const heightInput = createInput('Height(cm):', '50');
+    const weightInput = createInput('Weight(kg):', '10');
+    const quantityInput = createInput('Count:', '1');
+    const colorInput = createColorInput('', randomColor);
 
     // สร้างปุ่มบันทึกและลบ
     const saveButton = document.createElement("button");
-    saveButton.textContent = "Save";
-    saveButton.style.backgroundColor = "#4CAF50";
-    saveButton.style.color = "white";
-    saveButton.style.padding = "10px 20px";
-    saveButton.style.border = "none";
-    saveButton.style.borderRadius = "4px";
-    saveButton.style.fontSize = "16px";
-    saveButton.style.cursor = "pointer";
+    saveButton.innerHTML = '✓'; // เปลี่ยนเป็นเครื่องหมายถูก
+    saveButton.style.backgroundColor = '#3b82f6'; // สีฟ้า
+    saveButton.style.color = 'white';
+    saveButton.style.border = 'none';
+    saveButton.style.borderRadius = '8px';
+    saveButton.style.padding = '8px 16px';
+    saveButton.style.fontSize = '18px';
+    saveButton.style.cursor = 'pointer';
+    saveButton.style.marginTop = '10px';
+
     saveButton.addEventListener('click', function() {
-        // อัปเดตข้อมูล ID ทันทีโดยไม่ตรวจสอบ
         const newID = idInput.querySelector('input').value.trim();
         newBox.setAttribute('data-box-id', newID);
         newBox.id = newID.replace(/\s+/g, '-');
         boxContent.querySelector('strong').textContent = newID;
-        saveBoxData(newBox, widthInput, lengthInput, heightInput, weightInput, quantityInput, colorInput, editForm , defaultID);
-
-        // แสดงข้อมูลที่บันทึกใน console log
-        console.log('Box Saved:');
-        console.log('ID:', newID);
-        console.log('Width:', widthInput.querySelector('input').value);
-        console.log('Length:', lengthInput.querySelector('input').value);
-        console.log('Height:', heightInput.querySelector('input').value);
-        console.log('Weight:', weightInput.querySelector('input').value);
-        console.log('Quantity:', quantityInput.querySelector('input').value);
-        console.log('Color:', colorInput.querySelector('input').value);
+        saveBoxData(newBox, widthInput, lengthInput, heightInput, weightInput, quantityInput, colorInput, editForm, defaultID);
     });
 
+    // อัพเดท: สไตล์ปุ่มลบ
     const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.style.backgroundColor = "#f44336";
-    deleteButton.style.color = "white";
-    deleteButton.style.padding = "10px 20px";
-    deleteButton.style.border = "none";
-    deleteButton.style.borderRadius = "4px";
-    deleteButton.style.fontSize = "16px";
-    deleteButton.style.cursor = "pointer";
+    deleteButton.innerHTML = '🗑️';
+    deleteButton.style.backgroundColor = 'transparent';
+    deleteButton.style.border = 'none';
+    deleteButton.style.fontSize = '20px';
+    deleteButton.style.cursor = 'pointer';
+    deleteButton.style.marginLeft = '10px';
+    deleteButton.style.marginTop = '10px';
     deleteButton.addEventListener('click', function() {
         deleteBox(newBox);
     });
 
-    // เพิ่ม input และปุ่มลงใน editForm
+    // เพิ่มองค์ประกอบต่างๆ ลงในฟอร์มแก้ไข
+    editForm.appendChild(colorInput);
     editForm.appendChild(idInput);
     editForm.appendChild(widthInput);
     editForm.appendChild(lengthInput);
     editForm.appendChild(heightInput);
     editForm.appendChild(weightInput);
     editForm.appendChild(quantityInput);
-    editForm.appendChild(colorInput);
     editForm.appendChild(saveButton);
     editForm.appendChild(deleteButton);
 
-    // เพิ่ม event listener สำหรับคลิกที่ box
-    newBox.addEventListener('click', function (event) {
-        // ตรวจสอบว่าไม่ใช่การคลิกใน input
+    // เพิ่ม event listener สำหรับการคลิก
+    newBox.addEventListener('click', function(event) {
         if (event.target.tagName !== "INPUT" && event.target.tagName !== "BUTTON") {
             toggleEditForm(editForm);
         }
     });
-    
-    // เพิ่มตัวเลข boxCounter
+
+    document.getElementById("boxContent").appendChild(newBox);
     boxCounter++;
 }
 
 function createInput(labelText, defaultValue) {
     const label = document.createElement("label");
     label.textContent = labelText;
+    label.style.fontSize = '14px';
+    label.style.color = '#666';
+    label.style.marginRight = '8px'; // เพิ่มระยะห่างระหว่างป้ายกำกับกับช่องกรอก
+    label.style.minWidth = '80px'; // กำหนดความกว้างขั้นต่ำให้ป้ายกำกับ
+    label.style.display = 'inline-block'; // ทำให้ label อยู่ในแนวนอน
 
     const input = document.createElement("input");
     input.type = "text";
     input.value = defaultValue;
-    input.style.width = 'calc(100% - 20px)';
-    input.style.padding = '8px';
-    input.style.marginTop = '5px';
-    input.style.marginBottom = '10px';
-    input.style.border = '1px solid #ccc';
-    input.style.borderRadius = '5px';
-    input.style.boxSizing = 'border-box';
+    input.style.width = '80px'; // ลดขนาดความกว้างของช่องกรอก
+    input.style.padding = '8px 12px';
+    input.style.border = '1px solid #e2e8f0';
+    input.style.borderRadius = '8px';
+    input.style.fontSize = '14px';
+    input.style.backgroundColor = '#f8fafc';
 
-    
     const container = document.createElement("div");
+    container.style.display = 'inline-block'; // เปลี่ยนเป็น inline-block เพื่อให้อยู่ในแนวนอน
+    container.style.marginRight = '15px'; // เพิ่มระยะห่างระหว่างแต่ละช่องกรอก
+    container.style.marginBottom = '10px';
+    container.style.verticalAlign = 'top'; // จัดให้อยู่ชิดบน
+
     container.appendChild(label);
     container.appendChild(input);
 
-    // ใช้ stopPropagation เพื่อป้องกันการคลิกที่ input ที่จะไปกระทบกับ event ของ newBox
     input.addEventListener('click', function(event) {
         event.stopPropagation();
     });
@@ -773,25 +758,29 @@ function createInput(labelText, defaultValue) {
 function createColorInput(labelText, defaultValue) {
     const label = document.createElement("label");
     label.textContent = labelText;
-
+    
     const input = document.createElement("input");
     input.type = "color";
     input.value = defaultValue;
-    input.style.width = '100%';
-    input.style.padding = '5px';
-    input.style.marginTop = '5px';
-    input.style.marginBottom = '10px';
+    input.style.width = '40px';
+    input.style.height = '40px';
+    input.style.padding = '2px';
     input.style.border = 'none';
-    input.style.boxSizing = 'border-box';
-
+    input.style.borderRadius = '4px';
+    input.style.verticalAlign = 'middle';
+    
     const container = document.createElement("div");
-    container.appendChild(label);
+    container.style.display = 'inline-block';
+    container.style.marginRight = '15px';
+    container.style.marginBottom = '10px';
+    container.style.verticalAlign = 'top';
+    
     container.appendChild(input);
-
-    input.addEventListener('click', function (event) {
+    
+    input.addEventListener('click', function(event) {
         event.stopPropagation();
     });
-
+    
     return container;
 }
 
@@ -804,14 +793,10 @@ function toggleEditForm(editForm) {
     }
 }
 
-
 function deleteBox(boxElement) {
     // ลบ box ออกจาก DOM
     boxElement.remove();
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 let boxModels = []; // ตัวแปรเก็บโมเดล 3D ที่สร้างขึ้น
 let createdModels = [];  // ตัวแปรเก็บโมเดล 3D ที่สร้างขึ้น
@@ -855,26 +840,29 @@ function manageAction() {
     const boxes = document.querySelectorAll('.box'); // ดึงทุก box ที่มีอยู่ใน DOM
     const boxDataArray = []; // ตัวแปรเก็บข้อมูลกล่องทั้งหมด
 
-
     boxes.forEach((box) => {
         // ดึงข้อมูลจากแต่ละ box
         const boxId = box.getAttribute('data-box-id'); // ดึง ID จาก data-box-id
-        const width = parseFloat(box.querySelector('div').innerText.match(/Width: (\d+(\.\d+)?)/)[1]);
-        const length = parseFloat(box.querySelector('div').innerText.match(/Length: (\d+(\.\d+)?)/)[1]);
-        const height = parseFloat(box.querySelector('div').innerText.match(/Height: (\d+(\.\d+)?)/)[1]);
-        const weight = parseFloat(box.querySelector('div').innerText.match(/Weight: (\d+(\.\d+)?)/)[1].replace('kg', ''));
-        const quantity = parseInt(box.querySelector('div').innerText.match(/Quantity: (\d+)/)[1]);
-        const color = box.querySelector('input[type="color"]').value;
-        const countMatch = box.querySelector('div').innerText.match(/Count: (\d+)/);
-        const count = countMatch ? parseInt(countMatch[1]) : 0;
+        const text = box.querySelector('div').innerText;
 
+        // ใช้ Regular Expression เพื่อดึงค่ากว้าง ยาว สูง น้ำหนัก และจำนวน
+        const dimensions = text.match(/(\d+(.\d+)?)cm/g)?.map(dim => parseFloat(dim.replace('cm', '')));
+        const weight = parseFloat(text.match(/(\d+(.\d+)?)kg/)?.[1]);
+        const quantity = parseInt(text.match(/(\d+)unit/)?.[1]);
+
+        // ดึงค่าสีจาก input[type="color"]
+        const color = box.querySelector('input[type="color"]').value;
 
         // เพิ่มข้อมูลแต่ละกล่องเข้า array
-        boxDataArray.push({ boxId, width, length, height, weight, quantity,color ,count });
-        console.log(box.querySelector('div').innerText);
-        console.log(`Color: ${color}`); // แสดงค่าสีใน console เพื่อทดสอบ
-        console.log(`Box ID: ${boxId}`); // แสดง Box ID ใน console เพื่อทดสอบ
-
+        boxDataArray.push({
+            boxId,
+            width: dimensions?.[0] ||0,
+            length: dimensions?.[1] ||0,
+            height: dimensions?.[2] ||0,
+            weight: weight||0,
+            quantity: quantity|| 0,
+            color,
+        });
     });
 
     // เรียกใช้ placeBoxesFromInside ด้วยข้อมูลกล่องที่ได้
@@ -946,8 +934,6 @@ function create3DModel(width, length, height, x, y, z, color, boxId) {
     createdModels.push(line);
 }
 
-
-
 function clearPreviousModels() {
     // ลบโมเดลเก่าที่มีอยู่ใน createdModels
     createdModels.forEach(model => {
@@ -966,49 +952,37 @@ function saveBoxData(boxElement, widthInput, lengthInput, heightInput, weightInp
     const newWeight = parseFloat(weightInput.querySelector("input").value);
     const newQuantity = parseInt(quantityInput.querySelector("input").value);
     const newColor = colorInput.querySelector("input").value; // ดึงสีใหม่ที่เลือก
-
+    
     // อัปเดตข้อมูลใน boxContent
     const boxContent = boxElement.querySelector("div");
     boxContent.innerHTML = `
-        <div><strong>${boxId}</strong></div>
-        <div>Width: ${newWidth.toFixed(2)} m, Length: ${newLength.toFixed(2)} m, Height: ${newHeight.toFixed(2)} m</div>
-        <div>Weight: ${newWeight.toFixed(1)} kg, Quantity: ${newQuantity} unit </div>
-        <div>Color: ${newColor}</div> <!-- แสดงข้อมูลสี -->
+        <div style="font-family: 'Arial', sans-serif; color: #333;"><strong>${boxId}</strong></div>
+        <div style="font-family: 'Arial', sans-serif; font-size:16px; color: #666;">${newWidth}cm x ${newLength}cm x ${newHeight}cm x ${newWeight}kg x ${newQuantity}unit</div>
     `;
-
+    boxElement.style.background = `linear-gradient(to right, #ffffff 90%, ${newColor} 10%)`;
     // อัปเดตโมเดล 3D ใน boxModels
     const box3D = boxModels[boxId - 1];  // ดึงโมเดลที่ตรงกับ boxId
     if (box3D) {
         box3D.geometry.dispose();  // ลบ geometry เก่า
         box3D.geometry = new THREE.BoxGeometry(newWidth, newHeight, newLength);  // อัปเดต geometry ใหม่
-        box3D.material.color.set(newColor); // อัปเดตสีของโมเดล
+        box3D.material.color.set(newColor);
     }
-    // แสดงข้อมูลใน log
     console.log(`Updated ID : ${boxId} ,Width = ${newWidth.toFixed(2)} m, Length = ${newLength.toFixed(2)} m, Height = ${newHeight.toFixed(2)} m, Weight = ${newWeight.toFixed(2)} kg, Quantity = ${newQuantity}`);
-    // ซ่อนฟอร์มแก้ไขหลังจากบันทึก
+
     editForm.style.display = "none";
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 function placeBoxesFromInside(boxes) {
+    
     if (!currentContainerId) {
         console.error("No container selected. Please load a container first.");
         return;
     }
-    // ตรวจสอบว่า boxes เป็นอาร์เรย์
     if (!Array.isArray(boxes)) {
-        console.error("The provided boxes parameter is not an array:", boxes);
+        console.error("Expected 'boxes' to be an array, but got:", boxes);
         return;
     }
-
-    // ตรวจสอบว่ามีข้อมูลใน boxes หรือไม่
-    if (boxes.length === 0) {
-        console.warn("No boxes provided to place.");
-        return;
-    }
+    
 
     const container = containerData.find(c => c.id === currentContainerId);
     if (!container) {
@@ -1017,7 +991,7 @@ function placeBoxesFromInside(boxes) {
     }
 
     const ConWidth = container.length * 5;
-    const ConHeight = container.height * 5; 
+    const ConHeight = container.height * 5;
     const ConDepth = container.width * 5;
     const ConCap = container.weightCapacity;
     let totalWeight = 0; // น้ำหนักรวมของกล่องทั้งหมด
@@ -1035,15 +1009,15 @@ function placeBoxesFromInside(boxes) {
     let currentX = -ConWidth / 2;
     let currentY = gridHelper.position.y;
     let currentZ = -ConDepth / 2;
-    
+
     // เรียงลำดับกล่องจากขนาดใหญ่ไปเล็ก
     boxes.sort((a, b) => (b.width * b.length * b.height) - (a.width * a.length * a.height));
 
         boxes.forEach((box) => {
             const boxId = box.boxId; // ดึง Box ID 
-            const boxWidth = parseFloat(box.width) * 5;
-            const boxLength = parseFloat(box.length) * 5;
-            const boxHeight = parseFloat(box.height) * 5;
+            const boxWidth = parseFloat(box.width) / 20;
+            const boxLength = parseFloat(box.length) / 20;
+            const boxHeight = parseFloat(box.height) / 20;
             const boxWeight = parseFloat(box.weight); // น้ำหนักของกล่อง
             const boxColor = box.color || "#808080"; // ใช้สีจากฟอร์มหรือค่าเริ่มต้น (เทา)
             let boxPlacedCount = 0; // จำนวนกล่องที่วางได้ในรอบนี้
@@ -1072,7 +1046,7 @@ function placeBoxesFromInside(boxes) {
                         const newZ = baseZ + zOffset;
 
                         // ตรวจสอบขอบเขตไม่ให้กล่องเกินคอนเทนเนอร์
-                        if (newX + boxWidth <= ConWidth && newZ + boxLength <= ConDepth && baseY + boxHeight <= ConHeight) {
+                        if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight / 2) {
                             const collision = occupiedSpace.some((space) =>
                                 newX < space.x + space.width &&
                                 newX + boxWidth > space.x &&
@@ -1081,8 +1055,14 @@ function placeBoxesFromInside(boxes) {
                                 baseY < space.y + space.height &&
                                 baseY + boxHeight > space.y
                             );
+                            // เพิ่มเงื่อนไข: ตรวจสอบว่ากล่องติดกับกล่องอื่น
+                            const adjacentToBox = occupiedSpace.some((space) =>
+                                (newX === space.x + space.width || newX + boxWidth === space.x) ||
+                                (newZ === space.z + space.length || newZ + boxLength === space.z)
+                            );
 
-                            if (!collision) {
+
+                            if (!collision && adjacentToBox) {
                                 // วางกล่องที่ตำแหน่งนี้
                                 create3DModel(
                                     boxWidth,
@@ -1110,7 +1090,15 @@ function placeBoxesFromInside(boxes) {
                                     length: boxLength,
                                 });
                                 placed = true;
-                                boxPlacedCount++;
+                                placedBoxesData.push({
+                                    id: box.boxId,
+                                    width: box.width,
+                                    length: box.length,
+                                    height: box.height,
+                                    weight: box.weight,
+                                    color: boxColor,
+                                    count: i+1
+                                });
                                 placedBoxes++; // เพิ่มจำนวนกล่องที่วางได้
                                 break;
                             }
@@ -1124,9 +1112,7 @@ function placeBoxesFromInside(boxes) {
             if (!placed) {
                 for (let x = currentX; x + boxWidth <= ConWidth / 2; x += boxWidth) {
                     for (let z = currentZ; z + boxLength <= ConDepth / 2; z += boxLength) {
-                        for (let y = currentY; y + boxHeight <= ConHeight; y += boxHeight) {
-                            console.log(`YB :${y + boxHeight}, y :${y} , boxHeight${boxHeight}`);
-                            console.log(`currentY: ${currentY}, y: ${y}, y + boxHeight: ${y + boxHeight}`);
+                        for (let y = currentY; y + boxHeight <= ConHeight ; y += boxHeight) {
                             const collision = occupiedSpace.some((space) =>
                                 x < space.x + space.width &&
                                 x + boxWidth > space.x &&
@@ -1135,16 +1121,15 @@ function placeBoxesFromInside(boxes) {
                                 y < space.y + space.height &&
                                 y + boxHeight > space.y
                             );
-                            console.log(`collision=${collision}`);
 
                             
-                            if (x + boxWidth <= ConWidth / 2 && z + boxLength <= ConDepth / 2 && y + boxHeight <= ConHeight && !collision) {
+                            if (x + boxWidth <= ConWidth / 2 && z + boxLength <= ConDepth / 2 && y + boxHeight <= ConHeight  && !collision) {
                                 create3DModel(
                                     boxWidth,
                                     boxLength,
                                     boxHeight,
                                     x + boxWidth / 2,
-                                    y ,
+                                    y,
                                     z + boxLength / 2,
                                     boxColor , // ส่งสีไปยัง create3DModel
                                     boxId
@@ -1156,19 +1141,19 @@ function placeBoxesFromInside(boxes) {
                                     z,
                                     width: boxWidth,
                                     height: boxHeight,
-                                    length: boxLength,
+                                    length: boxLength
                                 });
                                 placed = true;
 
                                 // อัปเดตน้ำหนักรวม
                                 totalWeight += boxWeight;
-                                boxPlacedCount++;
 
                                 // แสดงใน console
                                 console.log(`วางกล่องสำเร็จ! กล่องที่ ${i + 1}/${box.quantity}`);
                                 console.log(`น้ำหนักรวม: ${totalWeight}, น้ำหนักกล่อง: ${boxWeight}`);
 
                                 // เก็บข้อมูลกล่องใน placedBoxesData พร้อมกับจำนวนกล่อง
+                                console.log("Placing box:", box);
                                 placedBoxesData.push({
                                     id: box.boxId,
                                     width: box.width,
@@ -1176,8 +1161,9 @@ function placeBoxesFromInside(boxes) {
                                     height: box.height,
                                     weight: box.weight,
                                     color: boxColor,
-                                    count: ++box.count
+                                    count: i+1
                                 });
+                                placedBoxes++;
                                 // เพิ่มกล่องที่วางได้ใน placedBoxesData
                                 break;
                             }
@@ -1196,14 +1182,14 @@ function placeBoxesFromInside(boxes) {
                     const baseZ = baseBox.z;
 
                     // ตรวจสอบว่าเราสามารถเพิ่มคอลัมน์ได้
-                    if (baseY + boxHeight <= ConHeight) {
+                    if (baseY + boxHeight <= ConHeight / 2) {
                         for (let xOffset = 0; xOffset + boxWidth <= baseBox.width; xOffset += boxWidth) {
                             for (let zOffset = 0; zOffset + boxLength <= baseBox.length; zOffset += boxLength) {
                                 const newX = baseX + xOffset;
                                 const newZ = baseZ + zOffset;
 
                                 // ตรวจสอบขอบเขตไม่ให้กล่องเกินคอนเทนเนอร์
-                                if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight) {
+                                if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight / 2) {
                                     const collision = occupiedSpace.some((space) =>
                                         newX < space.x + space.width &&
                                         newX + boxWidth > space.x &&
@@ -1212,8 +1198,13 @@ function placeBoxesFromInside(boxes) {
                                         baseY < space.y + space.height &&
                                         baseY + boxHeight > space.y
                                     );
+                                    // เพิ่มเงื่อนไข: ตรวจสอบว่ากล่องติดกับกล่องอื่น
+                                    const adjacentToBox = occupiedSpace.some((space) =>
+                                        (newX === space.x + space.width || newX + boxWidth === space.x) ||
+                                        (newZ === space.z + space.length || newZ + boxLength === space.z)
+                                    );
 
-                                    if (!collision) {
+                                    if (!collision && adjacentToBox) {
                                         // วางกล่องที่ตำแหน่งนี้
                                         create3DModel(
                                             boxWidth,
@@ -1233,7 +1224,16 @@ function placeBoxesFromInside(boxes) {
                                             length: boxLength,
                                         });
                                         placed = true;
-                                        boxPlacedCount++;
+                                        placedBoxesData.push({
+                                            id: box.boxId,
+                                            width: box.width,
+                                            length: box.length,
+                                            height: box.height,
+                                            weight: box.weight,
+                                            color: boxColor,
+                                            count: i+1
+                                        });
+                                        placedBoxes++;
 
                                         // อัปเดตน้ำหนักรวม
                                         totalWeight += boxWeight;
@@ -1267,51 +1267,49 @@ function placeBoxesFromInside(boxes) {
     sessionStorage.setItem("placedBoxesData", JSON.stringify(placedBoxesData));
     // หลังจากเก็บข้อมูลแล้ว สามารถดึงข้อมูลออกมาแสดงใน console ได้
     const storedData = JSON.parse(sessionStorage.getItem("placedBoxesData"));
-    console.log("ข้อมูลที่เก็บไว้ใน sessionStorage:", storedData);
+    // แสดงผลรวมใน console
 
     console.log(`จำนวนกล่องที่วางได้: ${placedBoxes}`);
     console.log(`จำนวนกล่องที่วางไม่ได้: ${unplacedBoxes}`);
+    // เรียกฟังก์ชัน footerDetails พร้อมส่งค่าตัวแปร
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// กำหนดตัวแปรทั่วโลกสำหรับใช้ในฟังก์ชันอื่น
 window.cwidth = 1; 
 window.clength = 1; 
 window.cheight = 3;
 
-// ตัวแปร global สำหรับเก็บ ID ของคอนเทนเนอร์ที่กำลังใช้งานอยู่
 let currentContainerId = null;
 
 function loadForms() {
     const formsContainer = document.getElementById('ContainerForms');
-    formsContainer.innerHTML = ''; // ล้างเนื้อหาก่อนสร้างใหม่
+    formsContainer.innerHTML = '';
 
     containerData.forEach((container, index) => {
         const formHtml = `
             <div class="container-wrapper">
                 <!-- ส่วนแสดงข้อมูล -->
-                <div id="display-${container.id}" class="container-display" onclick="toggleForm(${container.id})">
-                    <h4>${container.name || `Container ${index + 1}`}</h4>
-                    <div class="dimensions">
-                        <p>Width: ${container.width} m</p>
-                        <p>Length: ${container.length} m</p>
-                        <p>Height: ${container.height} m</p>
-                        <p>Weight Capacity: ${container.weightCapacity} kg</p>
+                <div id="display-${container.id}" class="container-display" onclick="updateCubeSize(${container.id}); event.stopPropagation();">
+                    <div class="content">
+                        <h4 class="container-name">${container.name || `Container ${index + 1}`}</h4>
+                        <div class="dimensions">
+                            ${container.width}m x ${container.length}m x ${container.height}m  ${container.weightCapacity}kg
+                        </div>
                     </div>
-                    <button onclick="updateCubeSize(${container.id}); event.stopPropagation();">Load</button>
+                    <i class="fas fa-edit edit-icon" onclick="toggleForm(${container.id}); event.stopPropagation();"></i>
                 </div>
                 <!-- ส่วนฟอร์มแก้ไข -->
                 <div id="form-${container.id}" class="container-form hidden">
                     <label for="cwidth-${container.id}">Width :</label>
-                    <input type="number" id="cwidth-${container.id}" value="${container.width}" />
+                    <input type="number" id="cwidth-${container.id}" value="${container.width}" onchange="saveData(${container.id});" />
+                    
                     <label for="clength-${container.id}">Length :</label>
-                    <input type="number" id="clength-${container.id}" value="${container.length}" />
+                    <input type="number" id="clength-${container.id}" value="${container.length}" onchange="saveData(${container.id});" />
+                    
                     <label for="cheight-${container.id}">Height :</label>
-                    <input type="number" id="cheight-${container.id}" value="${container.height}" />
+                    <input type="number" id="cheight-${container.id}" value="${container.height}" onchange="saveData(${container.id});" />
+                    
                     <label for="cweight-${container.id}">Weight Capacity (kg):</label>
-                    <input type="number" id="cweight-${container.id}" value="${container.weightCapacity}" />
-                    <button onclick="saveData(${container.id}); event.stopPropagation();">Save</button>
+                    <input type="number" id="cweight-${container.id}" value="${container.weightCapacity}" onchange="saveData(${container.id});" />
                 </div>
             </div>
         `;
@@ -1339,15 +1337,12 @@ function saveData(containerId) {
 
         const displayDiv = document.getElementById(`display-${containerId}`);
         displayDiv.querySelector('.dimensions').innerHTML = `
-            <p>Width: ${width} m</p>
-            <p>Length: ${length} m</p>
-            <p>Height: ${height} m</p>
-            <p>Weight Capacity: ${weightCapacity} kg</p>
+            <p>${width}m x ${length}m x ${height}m x ${weightCapacity}kg</p>
         `;
         footerDetails(containerId); // อัปเดต footer เมื่อบันทึกข้อมูลใหม่
     }
-
-    toggleForm(containerId); // ซ่อนฟอร์มหลังบันทึก
+    toggleForm(containerId);
+    updateDisplay(containerId);
 }
 
 function footerDetails(containerId,currentContainerId, placedBoxes, unplacedBoxes,totalWeight) {
@@ -1411,15 +1406,36 @@ function footerDetails(containerId,currentContainerId, placedBoxes, unplacedBoxe
 
 function toggleForm(containerId) {
     const formDiv = document.getElementById(`form-${containerId}`);
+    const displayDiv = document.getElementById(`display-${containerId}`);
     formDiv.classList.toggle('hidden');
-    // อัปเดต footer ให้แสดงข้อมูลจาก container ที่ถูกเลือก
-    if (!formDiv.classList.contains('hidden')) {
-        footerDetails(containerId); // แสดงข้อมูลใน footer เมื่อเปิดฟอร์ม
+
+    // อัปเดตการแสดงข้อมูลใน display div ก่อนแสดงฟอร์ม
+    if (formDiv.classList.contains('hidden')) {
+        // หากปิดฟอร์มให้แสดงข้อมูลที่อัปเดต
+        updateDisplay(containerId);
+    } else {
+        // ถ้าเปิดฟอร์มก็แสดงข้อมูลใน footer
+        footerDetails(containerId);
     }
-}   
+}
+
+// ฟังก์ชันเพื่ออัปเดตการแสดงข้อมูลใน display div
+function updateDisplay(containerId) {
+    const container = containerData.find(c => c.id === containerId);
+    const displayDiv = document.getElementById(`display-${containerId}`);
+
+    // อัปเดตค่าต่างๆ ที่แสดงใน display div
+    displayDiv.querySelector('.dimensions p:nth-child(1)').textContent = `Width: ${container.width} m`;
+    displayDiv.querySelector('.dimensions p:nth-child(2)').textContent = `Length: ${container.length} m`;
+    displayDiv.querySelector('.dimensions p:nth-child(3)').textContent = `Height: ${container.height} m`;
+    displayDiv.querySelector('.dimensions p:nth-child(4)').textContent = `Weight Capacity: ${container.weightCapacity} kg`;
+
+    // แสดงชื่อใหม่ถ้ามีการเปลี่ยนแปลง
+    displayDiv.querySelector('h4').textContent = container.name || `Container ${containerId}`;
+}
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // กำหนดขนาดของ renderer ที่คงที่
 renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -1485,7 +1501,6 @@ function captureAndSave(containerId) {
 footerDetails(); // เรียกครั้งแรกเพื่อแสดงข้อมูลใน footer
 loadForms();
 
-
 // ฟังก์ชันที่บังคับให้หน้าโหลดค้างเป็นเวลา 1 วินาที
 window.onload = function() {
     // ใช้ setTimeout เพื่อแสดง loading screen เป็นเวลา 1 วินาที
@@ -1493,7 +1508,6 @@ window.onload = function() {
         // ซ่อนหน้า loading screen
         document.getElementById('loadingScreen').style.display = 'none';
 
-        // แสดงเนื้อหาหลัก
-        document.getElementById('content').style.display = 'block';
+
     }, 1000);  // 1000 มิลลิวินาที = 1 วินาที
 };
