@@ -135,8 +135,7 @@ html {
     }
 }
 
-#listContent,
-#backupContent {
+#listContent {
     display: none;
     position: absolute;
     top: 0;
@@ -231,11 +230,11 @@ nav {
 #FooterContent {
     position: fixed;
     bottom: -60px;
-    left: 55%;
+    left: 53%;
     transform: translateX(-50%);
     width: 60%;
     /* กำหนดความกว้างของฟุตเตอร์ */
-    height: 145px;
+    height: 160px;
     padding: 20px;
     background-color: rgba(240, 240, 240, 0.9);
     /* โปร่งแสงที่ 90% */
@@ -245,7 +244,7 @@ nav {
     box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
     font-size: 14px;
     z-index: 7;
-    border-radius: 5px;
+    border-radius: 10px;
     transition: bottom 0.5s ease;
     /* เพิ่มการแอนิเมชันให้ฟุตเตอร์ */
 }
@@ -257,15 +256,15 @@ nav {
 
 #toggleButton {
     position: absolute;
-    bottom: 95px;
+    bottom: 100px;
     /* ตั้งค่าเริ่มต้นของปุ่มให้ถูกต้อง */
-    left: 428px;
+    left: 400px;
     transform: translateX(-50%);
     width: 50px;
     /* กำหนดขนาดความกว้างของปุ่ม */
     height: 40px;
     /* กำหนดขนาดความสูงของปุ่ม */
-    background-color: #007bff;
+    background-color: #42a6e1;
     color: white;
     border: none;
     border-radius: 10px;
@@ -292,11 +291,11 @@ nav {
 }
 
 #toggleButton:hover {
-    background-color: #0056b3;
+    background-color: #1e66b3;
     /* เปลี่ยนสีเมื่อ hover */
     transform: translateX(-50%) scale(1.05);
     /* ขยายปุ่มเล็กน้อยเมื่อ hover */
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 15px 28px rgba(0, 0, 0, 0.3);
     /* เพิ่มเงาเมื่อ hover */
 }
 
@@ -367,11 +366,11 @@ nav {
 
 #manageButton {
     position: fixed;
-    bottom: 60px;
+    bottom: 80px;
     right: 60px;
-    width: 120px;
-    height: 120px;
-    background-color: #2196F3;
+    width: 150px;
+    height: 150px;
+    background-color: #489fe6;
     color: white;
     border-radius: 50%;
     border: none;
@@ -565,4 +564,113 @@ input[type="number"] {
 input[type="number"]:focus {
     border-color: #28a745;
     outline: none;
+}
+
+/* hover button footerdetail location */
+.save-button:hover {
+    background-color: #3699c7 !important;
+    transform: scale(1.05);
+    /* ขยายปุ่มเล็กน้อยเมื่อ hover */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.pdf-button:hover {
+    background-color: #3699c7 !important;
+    transform: scale(1.05);
+    /* ขยายปุ่มเล็กน้อยเมื่อ hover */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* table listcontainer */
+.table-container {
+    overflow-x: auto;
+    /* ทำให้เลื่อนได้ในกรณีหน้าจอเล็ก */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* เพิ่มเงา */
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    background: #ffffff;
+    /* เปลี่ยนพื้นหลังเป็นสีขาว */
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.styled-table thead {
+    background: #ffffff;
+    /* เปลี่ยนพื้นหลังเป็นสีขาว */
+    color: #555;
+    font-size: 18px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* เพิ่มเงาที่หัวตาราง */
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 14px;
+    /* เพิ่มความสูงของ column */
+    text-align: center; /* จัดข้อความให้อยู่กลาง */
+    border-bottom: 1px solid #ddd;
+}
+
+.styled-table tbody tr:hover {
+    background: #f1f1f1;
+    /* เพิ่มสีพื้นหลังเมื่อ hover */
+}
+
+.styled-table td {
+    font-size: 14px;
+    color: #333;
+}
+
+@media (max-width: 600px) {
+
+    .styled-table th,
+    .styled-table td {
+        padding: 12px;
+        font-size: 12px;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    /* เพิ่มช่องว่างระหว่างปุ่ม */
+    justify-content: center; /* จัดปุ่มให้อยู่กลาง */
+}
+
+.icon-btn {
+    border: 1px solid #ddd;
+    /* ปรับเส้นขอบให้เป็นสีเทา */
+    background: none;
+    cursor: pointer;
+    font-size: 20px;
+    /* ขยายขนาดปุ่ม */
+    padding: 10px;
+    transition: 0.2s ease;
+    border-radius: 4px;
+    /* เพิ่มขอบมนให้ปุ่ม */
+}
+
+.export-btn i,
+.delete-btn i {
+    color: #333;
+}
+
+.icon-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* เพิ่มเงาให้ปุ่ม */
+}
+
+.export-btn i {
+    color: #28a745;
+}
+
+.delete-btn i {
+    color: #dc3545;
 }
