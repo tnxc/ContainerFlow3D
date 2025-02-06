@@ -58,13 +58,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
 animate();
 function toggleFlux(id) {
     const fluxContent = document.getElementById(id);
-    const otherFluxes = ['ContainerContent', 'boxContent', 'listContent', 'backupContent'].filter(flux => flux !== id);
+    const otherFluxes = ['ContainerContent', 'boxContent', 'listContent'].filter(flux => flux !== id); 
     const buttons = document.querySelectorAll('.btn');
 
     otherFluxes.forEach(function (otherFlux) {
         const otherFluxElement = document.getElementById(otherFlux);
         if (otherFluxElement.style.display === 'block') {
-            if (otherFlux === 'listContent' || otherFlux === 'backupContent') {
+            if (otherFlux === 'listContent') {
                 otherFluxElement.style.animation = 'slideOutTop 0.5s forwards';
             } else {
                 otherFluxElement.style.animation = 'slideOut 0.5s forwards';
@@ -76,7 +76,7 @@ function toggleFlux(id) {
     });
 
     if (fluxContent.style.display === 'block') {
-        if (id === 'listContent' || id === 'backupContent') {
+        if (id === 'listContent') {
             fluxContent.style.animation = 'slideOutTop 0.5s forwards';
         } else {
             fluxContent.style.animation = 'slideOut 0.5s forwards';
@@ -88,17 +88,17 @@ function toggleFlux(id) {
         buttons.forEach(button => button.classList.remove('active-btn'));
     } else {
         fluxContent.style.display = 'block';
-        if (id === 'listContent' || id === 'backupContent') {
+        if (id === 'listContent') {
             fluxContent.style.animation = 'slideTop 0.5s forwards';
         } else {
             fluxContent.style.animation = 'slideLeft 0.5s forwards';
         }
 
         buttons.forEach(button => button.classList.remove('active-btn'));
-        const activeButton = document.querySelector(button[onclick="toggleFlux('${id}')"]);
-        activeButton.classList.add('active-btn');
     }
 }
+
+
 document.getElementById("toggleButton").addEventListener("click", function() {
     const footer = document.getElementById("FooterContent");
     const button = document.getElementById("toggleButton");
@@ -106,10 +106,10 @@ document.getElementById("toggleButton").addEventListener("click", function() {
     // Toggle the bottom value of the footer and button
     if (footer.style.bottom === "0px") {
         footer.style.bottom = "-60px"; // Slide footer down
-        button.style.bottom = "95px";  // Keep button in place
+        button.style.bottom = "100px";  // Keep button in place
     } else {
         footer.style.bottom = "0px";  // Slide footer up
-        button.style.bottom = "155px"; // Move button up
+        button.style.bottom = "160px"; // Move button up
     }
 });
 function detailToggle(id) {
@@ -231,7 +231,6 @@ function updateCubeSize(containerId) {
     footerDetails(containerId);
     manageAction();
     placeBoxesFromInside(containerId,multipliedWidth, multipliedHeight, multipliedDepth)
-
 }
 
 function updateRulerX() {
@@ -595,6 +594,8 @@ function createRulerTextZ(size, line) {
 updateRulerZ();
 let boxCounter = 1;
 
+let recentColors = []; // รายการเก็บ 10 สีล่าสุด
+
 function getRandomColor() {
     const getValidValue = (excludedValues) => {
         let value;
@@ -604,20 +605,43 @@ function getRandomColor() {
         return value;
     };
 
-    // สุ่มตำแหน่งที่กำหนดเป็น 255
-    const fixed255Index = Math.floor(Math.random() * 3);
+    // ฟังก์ชั่นตรวจสอบสีที่แตกต่างจาก 10 สีล่าสุด
+    const isDifferentEnough = (newColor, recentColors) => {
+        return recentColors.every(color => {
+            const diff = newColor.map((value, index) => Math.abs(value - color[index]));
+            return diff.some(d => d >= 100); // ให้ความต่างขั้นต่ำที่ 100 หน่วยในแต่ละช่องสี
+        });
+    };
 
-    // สร้าง RGB
-    const rgb = [0, 0, 0];
-    rgb[fixed255Index] = 255; // ช่องที่กำหนดค่าเป็น 255
-    const otherIndexes = [0, 1, 2].filter(index => index !== fixed255Index);
+    let rgb;
+    let attempts = 0;
 
-    // กำหนดค่าสีที่เหลือโดยตรวจสอบความต่างอย่างน้อย 50
-    rgb[otherIndexes[0]] = getValidValue([rgb[fixed255Index]]); // ช่องที่สอง
-    rgb[otherIndexes[1]] = getValidValue([rgb[fixed255Index], rgb[otherIndexes[0]]]); // ช่องที่สาม
+    do {
+        // สุ่มตำแหน่งที่กำหนดเป็น 255
+        const fixed255Index = Math.floor(Math.random() * 3);
+
+        // สร้าง RGB
+        rgb = [0, 0, 0];
+        rgb[fixed255Index] = 255; // ช่องที่กำหนดค่าเป็น 255
+        const otherIndexes = [0, 1, 2].filter(index => index !== fixed255Index);
+
+        // กำหนดค่าสีที่เหลือโดยตรวจสอบความต่างอย่างน้อย 50
+        rgb[otherIndexes[0]] = getValidValue([rgb[fixed255Index]]); // ช่องที่สอง
+        rgb[otherIndexes[1]] = getValidValue([rgb[fixed255Index], rgb[otherIndexes[0]]]); // ช่องที่สาม
+
+        // เช็คความแตกต่างกับ 10 สีล่าสุด
+        attempts++;
+    } while (!isDifferentEnough(rgb, recentColors) && attempts < 10); // จำกัดการลองสุ่มไม่เกิน 10 ครั้ง
 
     // แปลงค่า RGB เป็น HEX
     const color = rgb.map(value => value.toString(16).padStart(2, '0')).join('');
+
+    // เก็บสีที่สุ่มล่าสุดลงในรายการ
+    recentColors.unshift(rgb); // เพิ่มสีที่สุ่มใหม่ที่ต้นรายการ
+    if (recentColors.length > 10) {
+        recentColors.pop(); // ลบสีเก่าที่สุดเมื่อเก็บครบ 10 สี
+    }
+
     return `#${color}`;
 }
 
@@ -645,7 +669,7 @@ function addBox() {
     boxContent.style.marginRight = "50px";
     boxContent.innerHTML = `
         <div style="font-family: 'Arial', sans-serif; color: #333;"><strong>${defaultID}</strong></div>
-        <div style="font-family: 'Arial', sans-serif; font-size:16px; color: #666;">50cm x 50cm x 50cm x 100kg x 1unit</div>
+        <div style="font-family: 'Arial', sans-serif; font-size:16px; color: #666;">100cm x 100cm x 100cm x 10kg x 1unit</div>
     `;
     newBox.appendChild(boxContent);
     document.getElementById("boxContent").appendChild(newBox);
@@ -658,9 +682,9 @@ function addBox() {
 
     // สร้าง input fields สำหรับแก้ไขข้อมูล
     const idInput = createInput('Item Name:', defaultID);
-    const widthInput = createInput('Width(cm):', '50');
-    const lengthInput = createInput('Length(cm):', '50');
-    const heightInput = createInput('Height(cm):', '50');
+    const widthInput = createInput('Width(cm):', '100');
+    const lengthInput = createInput('Length(cm):', '100');
+    const heightInput = createInput('Height(cm):', '100');
     const weightInput = createInput('Weight(kg):', '10');
     const quantityInput = createInput('Count:', '1');
     const colorInput = createColorInput('', randomColor);
@@ -719,6 +743,63 @@ function addBox() {
     document.getElementById("boxContent").appendChild(newBox);
     boxCounter++;
 }
+
+function savelist() {
+    const containerNameInput = document.getElementById('container-name');
+    const nameInput = containerNameInput.value.trim();
+    const boxes = document.querySelectorAll('.box'); 
+    const SaveDataList = [];
+    
+    // ดึงชื่อ container จาก footer หรือ input
+    const containerDisplayName = document.querySelector('#FooterDetails td:nth-child(2) div:first-child')?.innerText.trim();
+    const namecontainer = containerDisplayName;
+
+    // ใช้ userId ที่ส่งมาจาก server
+    const userId = window.userId; // ดึง userId ที่เรากำหนดไว้ใน script
+
+    boxes.forEach((box) => {
+        const boxId = box.getAttribute('data-box-id');
+        const text = box.querySelector('div').innerText;
+        const dimensions = text.match(/(\d+(.\d+)?)cm/g)?.map(dim => parseFloat(dim.replace('cm', ''))); 
+        const weight = parseFloat(text.match(/(\d+(.\d+)?)kg/)?.[1]) || 0;
+        const quantity = parseInt(text.match(/(\d+)unit/)?.[1]) || 0;
+        const color = box.querySelector('input[type="color"]').value;
+
+        SaveDataList.push({
+            userId, // 🔹 เพิ่ม userId เพื่อเชื่อมโยงข้อมูลกับผู้ใช้
+            namecontainer,  
+            nameInput,  
+            boxId,
+            width: dimensions?.[0] || 0,
+            length: dimensions?.[1] || 0,
+            height: dimensions?.[2] || 0,
+            weight,
+            quantity,
+            color,
+            createdDate: new Date().toISOString(),
+        });
+    });
+
+    fetch('/save-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(SaveDataList),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Data saved successfully!");
+            containerNameInput.value = "";
+        } else {
+            alert(`❌ Error: ${data.message}`); // แจ้งเตือนหากชื่อซ้ำกัน
+        }
+    })
+    .catch(error => {
+        console.error('Error saving data:', error);
+        alert("⚠ An error occurred while saving data.");
+    });   
+}
+
 
 function createInput(labelText, defaultValue) {
     const label = document.createElement("label");
@@ -973,7 +1054,6 @@ function saveBoxData(boxElement, widthInput, lengthInput, heightInput, weightInp
 }
 
 function placeBoxesFromInside(boxes) {
-    
     if (!currentContainerId) {
         console.error("No container selected. Please load a container first.");
         return;
@@ -982,7 +1062,6 @@ function placeBoxesFromInside(boxes) {
         console.error("Expected 'boxes' to be an array, but got:", boxes);
         return;
     }
-    
 
     const container = containerData.find(c => c.id === currentContainerId);
     if (!container) {
@@ -994,284 +1073,188 @@ function placeBoxesFromInside(boxes) {
     const ConHeight = container.height * 5;
     const ConDepth = container.width * 5;
     const ConCap = container.weightCapacity;
-    let totalWeight = 0; // น้ำหนักรวมของกล่องทั้งหมด
-    let placedBoxes = 0; // ตัวแปรสำหรับเก็บจำนวนกล่องที่วางได้
-    let unplacedBoxes = 0; // ตัวแปรสำหรับเก็บจำนวนกล่องที่วางไม่ได้
-    console.log(`PlaceEiEi - Width: ${container.width}, Length: ${container.height}, Height: ${container.length}, Cap: ${container.weightCapacity}`);
-    console.log(`PlaceAiAi - Width: ${ConWidth}, Length: ${ConDepth}, Height: ${ConHeight}, Cap: ${ConCap}, TotalCap: ${totalWeight}`);
-    console.log(`Placing boxes inside container ID: ${currentContainerId}`);
-    console.log(`เช็คหน่อยConWidth: ${ConWidth}, ConHeight: ${ConHeight}, ConDepth: ${ConDepth}`);
+    let totalWeight = 0;
+    let placedBoxes = 0;
+    let unplacedBoxes = 0;
 
-
-    const occupiedSpace = []; // เก็บพื้นที่ที่ถูกใช้งาน
-    const placedBoxesData = []; // เก็บข้อมูลของกล่องที่วางได้
+    const occupiedSpace = [];
+    const placedBoxesData = [];
 
     let currentX = -ConWidth / 2;
     let currentY = gridHelper.position.y;
     let currentZ = -ConDepth / 2;
 
-    // เรียงลำดับกล่องจากขนาดใหญ่ไปเล็ก
-    boxes.sort((a, b) => (b.width * b.length * b.height) - (a.width * a.length * a.height));
+    // เรียงกล่องตามขนาดพื้นที่ (กว้าง x ยาว) จากมากไปน้อย
+    boxes.sort((a, b) => {
+        const areaA = parseFloat(a.width) * parseFloat(a.length);
+        const areaB = parseFloat(b.width) * parseFloat(b.length);
+        return areaB - areaA;
+    });
 
-        boxes.forEach((box) => {
-            const boxId = box.boxId; // ดึง Box ID 
-            const boxWidth = parseFloat(box.width) / 20;
-            const boxLength = parseFloat(box.length) / 20;
-            const boxHeight = parseFloat(box.height) / 20;
-            const boxWeight = parseFloat(box.weight); // น้ำหนักของกล่อง
-            const boxColor = box.color || "#808080"; // ใช้สีจากฟอร์มหรือค่าเริ่มต้น (เทา)
-            let boxPlacedCount = 0; // จำนวนกล่องที่วางได้ในรอบนี้
-            console.log(`CapacityContainer: ${ConCap}`);
-            console.log(`Placing Box with ID: ${boxId}`); // แสดง Box ID ที่กำลังจะวาง
+    boxes.forEach((box) => {
+        const boxId = box.boxId;
+        const boxWidth = parseFloat(box.width) / 20;
+        const boxLength = parseFloat(box.length) / 20;
+        const boxHeight = parseFloat(box.height) / 20;
+        const boxWeight = parseFloat(box.weight);
+        const boxColor = box.color || "#808080";
 
         for (let i = 0; i < box.quantity; i++) {
-            // ตรวจสอบว่าน้ำหนักรวมเกิน ConCap หรือไม่
             if (totalWeight + boxWeight > ConCap) {
                 console.warn(`ไม่สามารถวางกล่องที่ ${i + 1}/${box.quantity} ได้ เนื่องจากเกินน้ำหนักที่กำหนด!`);
                 unplacedBoxes++;
                 return;
             }
+
             let placed = false;
 
-            // พยายามวางกล่องบนพื้นที่ด้านบนของกล่องที่มีอยู่
-            for (let baseBox of occupiedSpace) {
-                const baseX = baseBox.x;
-                const baseY = baseBox.y + baseBox.height; // ความสูงด้านบนของฐาน
-                const baseZ = baseBox.z;
+            // ฟังก์ชันตรวจสอบการชนกัน
+            const checkCollision = (x, y, z, width, length, height) => {
+                return occupiedSpace.some((space) =>
+                    x < space.x + space.width &&
+                    x + width > space.x &&
+                    z < space.z + space.length &&
+                    z + length > space.z &&
+                    y < space.y + space.height &&
+                    y + height > space.y
+                );
+            };
 
-                // ตรวจสอบว่าเราสามารถวางกล่องบนฐานนี้ได้หรือไม่
-                for (let xOffset = 0; xOffset + boxWidth <= baseBox.width; xOffset += boxWidth) {
-                    for (let zOffset = 0; zOffset + boxLength <= baseBox.length; zOffset += boxLength) {
-                        const newX = baseX + xOffset;
-                        const newZ = baseZ + zOffset;
+            // ฟังก์ชันตรวจสอบว่าสามารถวางกล่องซ้อนบนกล่องฐานได้หรือไม่
+            const canStackOnBase = (baseBox, newWidth, newLength, newWeight) => {
+                return newWidth <= baseBox.width && newLength <= baseBox.length && newWeight <= baseBox.weightCapacity;
+            };
 
-                        // ตรวจสอบขอบเขตไม่ให้กล่องเกินคอนเทนเนอร์
-                        if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight / 2) {
-                            const collision = occupiedSpace.some((space) =>
-                                newX < space.x + space.width &&
-                                newX + boxWidth > space.x &&
-                                newZ < space.z + space.length &&
-                                newZ + boxLength > space.z &&
-                                baseY < space.y + space.height &&
-                                baseY + boxHeight > space.y
+            // ฟังก์ชันหาความสูงที่เหมาะสมและกล่องฐานที่เหมาะสม
+            const findSuitableBase = (x, z, width, length, weight) => {
+                let suitableBase = null;
+                let maxY = 0;
+            
+                // กรองเฉพาะกล่องที่อยู่ในตำแหน่ง x,z ที่ซ้อนทับกัน
+                const potentialBases = occupiedSpace.filter(space =>
+                    x >= space.x && x + width <= space.x + space.width && // ตรวจสอบความกว้าง
+                    z >= space.z && z + length <= space.z + space.length // ตรวจสอบความยาว
+                );
+            
+                // เรียงตามความสูง
+                potentialBases.sort((a, b) => (b.y + b.height) - (a.y + a.height));
+            
+                // หากล่องฐานที่เหมาะสมที่สุด
+                for (const base of potentialBases) {
+                    if (canStackOnBase(base, width, length, weight)) {
+                        suitableBase = base;
+                        maxY = base.y + base.height;
+                        break;
+                    }
+                }
+            
+                return { suitableBase, maxY };
+            };
+
+            // หาพื้นที่ว่างที่เล็กที่สุดที่สามารถวางกล่องได้
+            let bestX = currentX;
+            let bestZ = currentZ;
+            let bestY = currentY;
+            let minGap = Infinity;
+            let bestBase = null;
+
+            // ลองวางกล่องในแต่ละตำแหน่ง
+            for (let x = currentX; x + boxWidth <= ConWidth / 2; x += 0.1) {
+                for (let z = currentZ; z + boxLength <= ConDepth / 2; z += 0.1) {
+                    const { suitableBase, maxY } = findSuitableBase(x, z, boxWidth, boxLength, boxWeight);
+                    const baseY = suitableBase ? maxY : currentY;
+
+                    if (baseY + boxHeight <= ConHeight &&
+                        !checkCollision(x, baseY, z, boxWidth, boxLength, boxHeight)) {
+
+                        // คำนวณระยะห่างจากกล่องที่มีอยู่แล้ว
+                        let totalGap = 0;
+                        occupiedSpace.forEach(space => {
+                            const xGap = Math.min(
+                                Math.abs(x - (space.x + space.width)),
+                                Math.abs((x + boxWidth) - space.x)
                             );
-                            // เพิ่มเงื่อนไข: ตรวจสอบว่ากล่องติดกับกล่องอื่น
-                            const adjacentToBox = occupiedSpace.some((space) =>
-                                (newX === space.x + space.width || newX + boxWidth === space.x) ||
-                                (newZ === space.z + space.length || newZ + boxLength === space.z)
+                            const zGap = Math.min(
+                                Math.abs(z - (space.z + space.length)),
+                                Math.abs((z + boxLength) - space.z)
                             );
-
-
-                            if (!collision && adjacentToBox) {
-                                // วางกล่องที่ตำแหน่งนี้
-                                create3DModel(
-                                    boxWidth,
-                                    boxLength,
-                                    boxHeight,
-                                    newX + boxWidth / 2,
-                                    baseY,
-                                    newZ + boxLength / 2,
-                                    boxColor, // ส่งสีไปยัง create3DModel
-                                    boxId
-                                );
-                                // อัปเดตน้ำหนักรวม
-                                totalWeight += boxWeight;
-
-                                // แสดงใน console
-                                console.log(`วางกล่องสำเร็จ! กล่องที่ ${i + 1}/${box.quantity}`);
-                                console.log(`น้ำหนักรวม: ${totalWeight}, น้ำหนักกล่อง: ${boxWeight}`);
-
-                                occupiedSpace.push({
-                                    x: newX,
-                                    y: baseY,
-                                    z: newZ,
-                                    width: boxWidth,
-                                    height: boxHeight,
-                                    length: boxLength,
-                                });
-                                placed = true;
-                                placedBoxesData.push({
-                                    id: box.boxId,
-                                    width: box.width,
-                                    length: box.length,
-                                    height: box.height,
-                                    weight: box.weight,
-                                    color: boxColor,
-                                    count: i+1
-                                });
-                                placedBoxes++; // เพิ่มจำนวนกล่องที่วางได้
-                                break;
+                            if (xGap < 0 || zGap < 0) {
+                                totalGap += xGap + zGap;
                             }
+                        });
+
+                        // อัพเดทตำแหน่งที่ดีที่สุด
+                        if (totalGap < minGap) {
+                            minGap = totalGap;
+                            bestX = x;
+                            bestZ = z;
+                            bestY = baseY;
+                            bestBase = suitableBase;
+                            if (minGap < 0) break;
                         }
                     }
-                    if (placed) break;
                 }
-                if (placed) break;
+                if (minGap < 0) break;
             }
 
-            if (!placed) {
-                for (let x = currentX; x + boxWidth <= ConWidth / 2; x += boxWidth) {
-                    for (let z = currentZ; z + boxLength <= ConDepth / 2; z += boxLength) {
-                        for (let y = currentY; y + boxHeight <= ConHeight ; y += boxHeight) {
-                            const collision = occupiedSpace.some((space) =>
-                                x < space.x + space.width &&
-                                x + boxWidth > space.x &&
-                                z < space.z + space.length &&
-                                z + boxLength > space.z &&
-                                y < space.y + space.height &&
-                                y + boxHeight > space.y
-                            );
+            // ถ้าเจอตำแหน่งที่เหมาะสม
+            if (minGap !== 0.0000001) {
+                // วางกล่อง
+                create3DModel(
+                    boxWidth,
+                    boxLength,
+                    boxHeight,
+                    bestX + boxWidth / 2,
+                    bestY,
+                    bestZ + boxLength / 2,
+                    boxColor,
+                    boxId
+                );
 
-                            
-                            if (x + boxWidth <= ConWidth / 2 && z + boxLength <= ConDepth / 2 && y + boxHeight <= ConHeight  && !collision) {
-                                create3DModel(
-                                    boxWidth,
-                                    boxLength,
-                                    boxHeight,
-                                    x + boxWidth / 2,
-                                    y,
-                                    z + boxLength / 2,
-                                    boxColor , // ส่งสีไปยัง create3DModel
-                                    boxId
-                                );
+                // บันทึกพื้นที่ที่ใช้
+                occupiedSpace.push({
+                    x: bestX,
+                    y: bestY,
+                    z: bestZ,
+                    width: boxWidth,
+                    height: boxHeight,
+                    length: boxLength,
+                    id: boxId,
+                    weightCapacity: boxWeight
+                });
 
-                                occupiedSpace.push({
-                                    x,
-                                    y,
-                                    z,
-                                    width: boxWidth,
-                                    height: boxHeight,
-                                    length: boxLength
-                                });
-                                placed = true;
+                totalWeight += boxWeight;
+                placed = true;
+                placedBoxes++;
 
-                                // อัปเดตน้ำหนักรวม
-                                totalWeight += boxWeight;
+                placedBoxesData.push({
+                    id: boxId,
+                    width: box.width,
+                    length: box.length,
+                    height: box.height,
+                    weight: boxWeight,
+                    color: boxColor,
+                    count: i + 1
+                });
 
-                                // แสดงใน console
-                                console.log(`วางกล่องสำเร็จ! กล่องที่ ${i + 1}/${box.quantity}`);
-                                console.log(`น้ำหนักรวม: ${totalWeight}, น้ำหนักกล่อง: ${boxWeight}`);
+                console.log(`วางกล่อง ID: ${boxId} สำเร็จ ที่ตำแหน่ง x:${bestX}, y:${bestY}, z:${bestZ}`);
 
-                                // เก็บข้อมูลกล่องใน placedBoxesData พร้อมกับจำนวนกล่อง
-                                console.log("Placing box:", box);
-                                placedBoxesData.push({
-                                    id: box.boxId,
-                                    width: box.width,
-                                    length: box.length,
-                                    height: box.height,
-                                    weight: box.weight,
-                                    color: boxColor,
-                                    count: i+1
-                                });
-                                placedBoxes++;
-                                // เพิ่มกล่องที่วางได้ใน placedBoxesData
-                                break;
-                            }
-                        }
-                        if (placed) break;
-                    }
-                    if (placed) break;
-                }
-            }
-
-            // เพิ่มคอลัมน์ใหม่ถ้ายังมีพื้นที่ว่าง
-            if (!placed) {
-                for (let baseBox of occupiedSpace) {
-                    const baseX = baseBox.x;
-                    const baseY = baseBox.y + baseBox.height; // ความสูงด้านบนของฐาน
-                    const baseZ = baseBox.z;
-
-                    // ตรวจสอบว่าเราสามารถเพิ่มคอลัมน์ได้
-                    if (baseY + boxHeight <= ConHeight / 2) {
-                        for (let xOffset = 0; xOffset + boxWidth <= baseBox.width; xOffset += boxWidth) {
-                            for (let zOffset = 0; zOffset + boxLength <= baseBox.length; zOffset += boxLength) {
-                                const newX = baseX + xOffset;
-                                const newZ = baseZ + zOffset;
-
-                                // ตรวจสอบขอบเขตไม่ให้กล่องเกินคอนเทนเนอร์
-                                if (newX + boxWidth <= ConWidth / 2 && newZ + boxLength <= ConDepth / 2 && baseY + boxHeight <= ConHeight / 2) {
-                                    const collision = occupiedSpace.some((space) =>
-                                        newX < space.x + space.width &&
-                                        newX + boxWidth > space.x &&
-                                        newZ < space.z + space.length &&
-                                        newZ + boxLength > space.z &&
-                                        baseY < space.y + space.height &&
-                                        baseY + boxHeight > space.y
-                                    );
-                                    // เพิ่มเงื่อนไข: ตรวจสอบว่ากล่องติดกับกล่องอื่น
-                                    const adjacentToBox = occupiedSpace.some((space) =>
-                                        (newX === space.x + space.width || newX + boxWidth === space.x) ||
-                                        (newZ === space.z + space.length || newZ + boxLength === space.z)
-                                    );
-
-                                    if (!collision && adjacentToBox) {
-                                        // วางกล่องที่ตำแหน่งนี้
-                                        create3DModel(
-                                            boxWidth,
-                                            boxLength,
-                                            boxHeight,
-                                            newX + boxWidth / 2,
-                                            baseY,
-                                            newZ + boxLength / 2
-                                        );
-
-                                        occupiedSpace.push({
-                                            x: newX,
-                                            y: baseY,
-                                            z: newZ,
-                                            width: boxWidth,
-                                            height: boxHeight,
-                                            length: boxLength,
-                                        });
-                                        placed = true;
-                                        placedBoxesData.push({
-                                            id: box.boxId,
-                                            width: box.width,
-                                            length: box.length,
-                                            height: box.height,
-                                            weight: box.weight,
-                                            color: boxColor,
-                                            count: i+1
-                                        });
-                                        placedBoxes++;
-
-                                        // อัปเดตน้ำหนักรวม
-                                        totalWeight += boxWeight;
-
-                                        // แสดงใน console
-                                        console.log(`วางกล่องสำเร็จ! กล่องที่ ${i + 1}/${box.quantity}`);
-                                        console.log(`น้ำหนักรวม: ${totalWeight}, น้ำหนักกล่อง: ${boxWeight}`);
-
-                                        break;
-                                    }
-                                }
-                            }
-                            if (placed) break;
-                        }
-                    }
-                    if (placed) break;
+                if (bestBase) {
+                    console.log(`วางซ้อนบนกล่อง ID: ${bestBase.id}`);
+                } else {
+                    console.log('วางบนพื้น');
                 }
             }
 
             if (!placed) {
-                console.log("พื้นที่ไม่เพียงพอสำหรับวางกล่อง");
-                unplacedBoxes++; // เพิ่มจำนวนกล่องที่วางไม่ได้
+                console.log(`ไม่สามารถวางกล่อง ID: ${boxId} ได้`);
+                unplacedBoxes++;
             }
         }
     });
-    footerDetails(currentContainerId, currentContainerId,placedBoxes, unplacedBoxes,totalWeight);
 
-    // ก่อนที่จะเก็บข้อมูลใน sessionStorage
-    console.log("ข้อมูลที่เก็บใน placedBoxesData:", placedBoxesData);
-    // เก็บข้อมูล placedBoxesData ใน sessionStorage
+    footerDetails(currentContainerId, currentContainerId, placedBoxes, unplacedBoxes, totalWeight);
     sessionStorage.setItem("placedBoxesData", JSON.stringify(placedBoxesData));
-    // หลังจากเก็บข้อมูลแล้ว สามารถดึงข้อมูลออกมาแสดงใน console ได้
-    const storedData = JSON.parse(sessionStorage.getItem("placedBoxesData"));
-    // แสดงผลรวมใน console
-
-    console.log(`จำนวนกล่องที่วางได้: ${placedBoxes}`);
-    console.log(`จำนวนกล่องที่วางไม่ได้: ${unplacedBoxes}`);
-    // เรียกฟังก์ชัน footerDetails พร้อมส่งค่าตัวแปร
 }
 
 window.cwidth = 1; 
@@ -1345,63 +1328,76 @@ function saveData(containerId) {
     updateDisplay(containerId);
 }
 
-function footerDetails(containerId,currentContainerId, placedBoxes, unplacedBoxes,totalWeight) {
+function footerDetails(containerId, currentContainerId, placedBoxes, unplacedBoxes, totalWeight) {
     const footerDetailsDiv = document.getElementById('FooterDetails');
     footerDetailsDiv.innerHTML = ''; // ล้างเนื้อหาก่อนเพิ่มข้อมูลใหม่
-    
+
     console.log(`Placed Boxes: ${placedBoxes}`);
     console.log(`Unplaced Boxes: ${unplacedBoxes}`);
 
     const container = containerData.find(c => c.id === containerId);
     if (container) {
         footerDetailsDiv.innerHTML = `
-            <table border="1" style="border-collapse: collapse; width: 80%; text-align: left; font-size: 12px; margin: auto; margin-top: 2px; border: 2px solid black;">
-                <tr style="border-bottom: 2px solid black;">
-                    <td colspan="4" style="text-align: center; font-weight: bold; padding: 2px; border: 2px solid black;">
-                        ${container.name || `Container ${containerId}`}
+            <!-- TABLE ด้านบน -->
+            <table style="border-collapse: collapse; width: 100%; text-align: left; font-size: 13px; background: #f9f9f9; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+                <tr style="background-color: #f1f1f1;">
+                    <!-- ส่วนที่ 1: ช่องใส่ชื่อบันทึก + ปุ่ม Save -->
+                    <td style="width: 100%; padding: 21px 10px 21px 10px; display: flex; align-items: center; border-right: 1px solid #ccc;">
+                        <input type="text" id="container-name" placeholder="Container Name" 
+                            style="flex: 1; height: 38px; padding: 5px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        <button class="save-button" onclick="savelist();" style="width: 38px; height: 38px; margin-left: 8px; border: none; background-color: #42a6e1; color: white; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-floppy" style="font-size: 18px;"></i>
+                        </button>
                     </td>
-                    <td rowspan="2" style="border: 2px solid black; padding: 10px; text-align: center;">
-                        <button onclick="captureAndSave(${containerId}); window.open('/report', '_blank');" style="font-size: 24px; padding: 10px; border: none; background-color: transparent;">
-                        <i class="bi bi-filetype-pdf"></i>
-                    </button>
+
+                    <!-- ส่วนที่ 2: รายละเอียดของ Container -->
+                    <td style="width: 100%; padding: 6px; text-align: center; border-right: 1px solid #ccc;">
+                        <div style="font-size: 16px; font-weight: bold; padding-bottom: 4px; border-bottom: 1px solid #ccc;"> 
+                            ${container.name || `Container ${containerId}`}
+                        </div>
+                        <div style="display: flex; justify-content: space-evenly; font-size: 12px; color: #666;">
+                            <span style="border-right: 1px solid #ccc; padding: 7px 7px 0px; 0px;">Length: ${container.length} cm</span>
+                            <span style="border-right: 1px solid #ccc; padding: 7px 7px 0px; 0px;">Width: ${container.width} cm</span>
+                            <span style="border-right: 1px solid #ccc; padding: 7px 7px 0px; 0px;">Height: ${container.height} cm</span>
+                            <span style="border-right: 1px solid #ccc; padding: 7px 7px 0px; 0px;">Max Load: ${container.weightCapacity} kg</span>
+                            <span style="padding: 7px 7px 0px 0px;">Volume: ${(container.length * container.width * container.height).toFixed(2)} m³</span>
+                        </div>
+                    </td>
+
+                    <!-- ส่วนที่ 3: ปุ่ม PDF -->
+                    <td style="width: 10%; text-align: center; padding: 10px;">
+                        <button class="pdf-button" onclick="captureAndSave(${containerId}); window.open('/report', '_blank');" 
+                                style="width: 40px; height: 40px; font-size: 23px; border: none; background-color: #42a6e1; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+                            <i class="bi bi-filetype-pdf"></i>
+                        </button>
                     </td>
                 </tr>
-                <tr>
-                    <td style="border: 2px solid black; padding: 10px;">Width: ${container.width} m</td>
-                    <td style="border: 2px solid black; padding: 10px;">Length: ${container.length} m</td>
-                    <td style="border: 2px solid black; padding: 10px;">Height: ${container.height} m</td>
-                    <td style="border: 2px solid black; padding: 10px;">Weight Capacity: ${container.weightCapacity} kg</td>
-                </tr>
-                
             </table>
 
-        <table style="width: 500px; text-align: left; font-size: 14px; margin-left: auto; margin-right: auto; margin-top: 7px;">
-            <tr>
-                <td style="border: 2px solid black; padding: 10px; font-weight: bold; line-height: 1.2; width: 40%;">
-                    Loaded Boxes: ${placedBoxes} Box <br>
-                    Unloaded Boxes: ${unplacedBoxes} Box
-                </td>
-                <td style="border: 2px solid black; padding: 10px; font-weight: bold; line-height: 1;">
-                    <div style="margin-bottom: 20px; text-align: center;"> remaining weight : ${container.weightCapacity - totalWeight} kg </div>
-
-                    <div style="width: 100%; background-color: rgb(177, 177, 177); border-radius: 5px; height: 20px; margin-top: -12px;">
-                        <div style="width: ${Math.min(totalWeight / container.weightCapacity * 100, 100)}%; background-color: #4caf50; height: 100%; border-radius: 5px;">
-                            <span style="color: white; font-weight: bold; text-align: center; line-height: 20px; display: block;">
-                                ${Math.round(totalWeight / container.weightCapacity * 100)}%<br>
-                            </span>
+            <!-- TABLE ด้านล่าง -->
+            <table style="width: 100%; text-align: left; font-size: 13px; border-collapse: collapse; background: #ffffff; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); margin-top: 8px;">
+                <tr style="background-color: #f1f1f1;">
+                    <td style="padding: 6px; font-weight: bold; width: 40%; border-right: 1px solid #ccc;">
+                        Loaded Items: ${placedBoxes} <br>
+                        Not Loaded Items: ${unplacedBoxes}
+                    </td>
+                    <td style="padding: 6px; font-weight: bold; text-align: center;">
+                        <div style="margin-bottom: 2px; font-size: 14px; color: #333;">Remaining Weight: ${container.weightCapacity - totalWeight} kg</div>
+                        <div style="width: 100%; background-color: #ddd; border-radius: 4px; height: 25px; position: relative;">
+                            <div style="width: ${Math.min(totalWeight / container.weightCapacity * 100, 100)}%; background-color: #28a745; height: 100%; border-radius: 4px; transition: width 0.5s ease;">
+                                <span style="position: absolute; width: 100%; text-align: center; color: white; font-weight: bold; line-height: 25px;">
+                                    ${Math.round(totalWeight / container.weightCapacity * 100)}%
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-
-
+                    </td>
+                </tr>
+            </table>
         `;
+
     } else {
         footerDetailsDiv.innerHTML = '<p>Container not found.</p>';
     }
-
 }
 
 function toggleForm(containerId) {

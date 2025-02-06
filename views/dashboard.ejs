@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -41,10 +40,6 @@
                     <li class="nav-item">
                         <button class="btn btn-light fs-5 px-4 text-secondary"
                             onclick="toggleFlux('listContent')">List</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-light fs-5 px-4 text-secondary"
-                            onclick="toggleFlux('backupContent')">Backup</button>
                     </li>
                 </ul>
             </div>
@@ -128,15 +123,45 @@
     </div>
 
     <div id="listContent">
-        <h3>List <i class="bi bi-chevron-bar-up" onclick="toggleFlux('listContent')" style="cursor: pointer"></i></h3>
-        <p>เนื้อหาของ List จะแสดงที่นี่เมื่อกดปุ่ม "List".</p>
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>picture</th>
+                        <th>NameContainer</th>
+                        <th>Container Name</th>
+                        <th>Created Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% uniqueContainers.forEach(container=> { %>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <%= container.namecontainer %>
+                            </td>
+                            <td>
+                                <%= container.nameInput %>
+                            </td>
+                            <td>
+                                <%= new Date(container.createdDate).toLocaleString() %>
+                            </td>
+                            <td class="actions">
+                                <button class="icon-btn export-btn" onclick="exportData('<%= container._id %>')">
+                                    <i class="fas fa-file-export"></i>
+                                </button>
+                                <button class="icon-btn delete-btn" onclick="deleteData('<%= container._id %>')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div id="backupContent">
-        <h3>Backup <i class="bi bi-chevron-bar-up" onclick="toggleFlux('BackupContent')" style="cursor: pointer"></i>
-        </h3>
-        <p>เนื้อหาของ Backup จะแสดงที่นี่เมื่อกดปุ่ม "Backup".</p>
-    </div>
     <button id="toggleButton" onclick="toggleIcon()">
         <i class="bi bi-caret-up-fill" id="toggleIcon"></i>
     </button>
@@ -148,10 +173,10 @@
 
     <button id="manageButton" onclick="manageAction()">Manage</button>
 
-
     <script>
         // รับค่า userName จากฝั่งเซิร์ฟเวอร์
-        const userName = '<%= userName %>';  // สั่งให้ EJS แสดงผลค่าจาก server
+        const userName = '<%= userName %>';
+        const userId = "<%= userId %>";
 
         // แสดงชื่อใน Dropdown หรือที่ต้องการ
         document.addEventListener('DOMContentLoaded', () => {

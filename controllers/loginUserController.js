@@ -6,7 +6,7 @@ module.exports = (req, res) => {
     // ค้นหาผู้ใช้ที่มีอีเมลตรงกับที่กรอก
     User.findOne({ email: email })
         .then((user) => {
-            console.log(user); // ตรวจสอบผลลัพธ์เพื่อดูข้อมูลผู้ใช้
+            console.log("user is",user); // ตรวจสอบผลลัพธ์เพื่อดูข้อมูลผู้ใช้
 
             if (user) {
                 // ตรวจสอบรหัสผ่าน
