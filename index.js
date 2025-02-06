@@ -24,7 +24,7 @@ const dashboardController = require('./controllers/dashboardController')
 const reportController = require('./controllers/reportController')
 const updateUserController = require('./controllers/updateUserController');
 const saveDataController = require('./controllers/savedataController');
-const deleteContainer = require('../CM/controllers/deleteContainer');
+const deleteContainer = require('./controllers/deleteContainer');
 
 //middleware
 const pathMiddleware = require('./middleware/pathMiddleware')
