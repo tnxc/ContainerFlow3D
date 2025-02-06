@@ -800,6 +800,29 @@ function savelist() {
     });   
 }
 
+async function deleteData(nameInput) {
+    if (!confirm(`Are you sure you want to delete containers named "${nameInput}"?`)) return;
+
+    try {
+        const response = await fetch('/delete-container', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nameInput })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Container deleted successfully');
+            location.reload(); // รีเฟรชหน้าเพื่ออัปเดตข้อมูล
+        } else {
+            alert(result.error);
+        }
+    } catch (error) {
+        console.error('Error deleting data:', error);
+        alert('Error deleting container');
+    }
+}
 
 function createInput(labelText, defaultValue) {
     const label = document.createElement("label");
