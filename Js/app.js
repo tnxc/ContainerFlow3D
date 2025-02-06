@@ -789,6 +789,7 @@ function savelist() {
     .then(data => {
         if (data.success) {
             alert("Data saved successfully!");
+            window.location.reload();
             containerNameInput.value = "";
         } else {
             alert(`❌ Error: ${data.message}`); // แจ้งเตือนหากชื่อซ้ำกัน
