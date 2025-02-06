@@ -29,6 +29,7 @@ module.exports = async (req, res) => {
             userName: req.session.userName, // ชื่อผู้ใช้
             userId: req.session.userId,
             uniqueContainers, // ส่งชื่อ container ที่ไม่ซ้ำ
+            boxes: JSON.stringify(boxes)
         });
 
     } catch (error) {

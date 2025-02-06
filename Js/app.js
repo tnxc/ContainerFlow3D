@@ -1517,8 +1517,31 @@ function captureAndSave(containerId) {
     camera.rotation.copy(currentRotation);
 }
 
+
+function upload(boxes) {
+    try {
+        // ถ้าข้อมูลเป็น String ที่มี &#34; ให้แปลงกลับ
+        let decodedBoxes = JSON.parse(boxes.replace(/&#34;/g, '"'));
+
+        console.log("Uploading boxesxxxxxxxxxxxxxxxxxxxxxxxx:", decodedBoxes);
+        
+        // ทำสิ่งที่ต้องการกับข้อมูล decodedBoxes เช่น วนลูปแสดงผล
+        decodedBoxes.forEach(box => {
+            console.log(`Container Name: ${box.namecontainer}`);
+            console.log(`Box Name: ${box.nameInput}`);
+            console.log(`Dimensions: ${box.width}x${box.length}x${box.height}`);
+            console.log(`Color: ${box.color}`);
+            console.log("------------");
+        });
+
+    } catch (error) {
+        console.error("Error parsing boxes:", error);
+    }
+}
+
 footerDetails(); // เรียกครั้งแรกเพื่อแสดงข้อมูลใน footer
 loadForms();
+upload();
 
 // ฟังก์ชันที่บังคับให้หน้าโหลดค้างเป็นเวลา 1 วินาที
 window.onload = function() {
