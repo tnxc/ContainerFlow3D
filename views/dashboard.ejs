@@ -148,7 +148,7 @@
                                 <%= new Date(container.createdDate).toLocaleString() %>
                             </td>
                             <td class="actions">
-                                <button class="icon-btn export-btn" onclick="exportData('<%= container._id %>')">
+                                <button class="icon-btn export-btn uploadButton" data-container-name-input="<%= container.nameInput %>">
                                     <i class="fas fa-file-export"></i>
                                 </button>
                                 <button class="icon-btn delete-btn" onclick="deleteData('<%= container.nameInput %>')">
@@ -177,13 +177,20 @@
         // รับค่าตัวแปรจาก Server
         const boxes = '<%= boxes %>';
     
-        // เรียกใช้งานฟังก์ชัน upload โดยส่งค่า boxes ไปให้
+        // รอการกดปุ่มเพื่อเรียกฟังก์ชัน upload
         document.addEventListener('DOMContentLoaded', function () {
-            if (typeof upload === 'function') {
-                upload(boxes);
-            } else {
-                console.error("upload function is not defined");
-            }
+            // เลือกปุ่มทั้งหมดที่มีคลาส uploadButton
+            document.querySelectorAll('.uploadButton').forEach(button => {
+                button.addEventListener('click', function () {
+                    const containerNameInput = button.dataset.containerNameInput;
+        
+                    if (typeof upload === 'function') {
+                        upload(boxes, containerNameInput); // ส่งค่าตัวแปร boxes และ containerNameInput ไปยังฟังก์ชัน upload
+                    } else {
+                        console.error("upload function is not defined");
+                    }
+                });
+            });
         });
     </script>
     <script>
