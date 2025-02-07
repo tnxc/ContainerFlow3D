@@ -1,15 +1,12 @@
-const Box = require('../models/Box'); // นำเข้าโมเดล Box
-
+const Box = require('../models/Box');
 module.exports = async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
-        const { nameInput } = req.body; // รับค่า nameInput ที่ต้องการลบ
-        const userId = req.session.userId; // ใช้ userId จาก session
-
-        // ลบข้อมูลทั้งหมดที่มี nameInput ตรงกัน และเป็นของ user นั้น
+        const { nameInput } = req.body; 
+        const userId = req.session.userId;
         const result = await Box.deleteMany({ nameInput, userId });
 
         if (result.deletedCount > 0) {

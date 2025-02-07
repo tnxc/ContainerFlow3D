@@ -766,8 +766,8 @@ function savelist() {
     const containerDisplayName = document.querySelector('#FooterDetails td:nth-child(2) div:first-child')?.innerText.trim();
     const namecontainer = containerDisplayName;
 
-    // ใช้ userId ที่ส่งมาจาก server
-    const userId = window.userId; // ดึง userId ที่เรากำหนดไว้ใน script
+    // ✅ ใช้ userId ที่ได้จากเซิร์ฟเวอร์
+    const userId = window.userId;
 
     boxes.forEach((box) => {
         const boxId = box.getAttribute('data-box-id');
@@ -778,7 +778,7 @@ function savelist() {
         const color = box.querySelector('input[type="color"]').value;
 
         SaveDataList.push({
-            userId, // 🔹 เพิ่ม userId เพื่อเชื่อมโยงข้อมูลกับผู้ใช้
+            userId,  // ✅ เพิ่ม userId ไปในข้อมูลที่บันทึก
             namecontainer,  
             nameInput,  
             boxId,
@@ -812,6 +812,7 @@ function savelist() {
         alert("⚠ An error occurred while saving data.");
     });   
 }
+
 
 async function deleteData(nameInput) {
     if (!confirm(`Are you sure you want to delete containers named "${nameInput}"?`)) return;
@@ -1135,6 +1136,19 @@ function placeBoxesFromInside(boxes) {
         const boxWeight = parseFloat(box.weight);
         const boxColor = box.color || "#808080";
 
+        // เพิ่มการตรวจสอบขนาดของกล่องเทียบกับ container
+        if (boxWidth > ConWidth || boxLength > ConDepth) {
+            console.error(`กล่อง ID: ${boxId} มีขนาดใหญ่เกินกว่า container (กว้าง: ${boxWidth}, ยาว: ${boxLength})`);
+            unplacedBoxes += box.quantity;
+            return;
+        }
+
+        if (boxHeight > ConHeight) {
+            console.error(`กล่อง ID: ${boxId} มีความสูงเกินกว่า container (สูง: ${boxHeight})`);
+            unplacedBoxes += box.quantity;
+            return;
+        }
+
         for (let i = 0; i < box.quantity; i++) {
             if (totalWeight + boxWeight > ConCap) {
                 console.warn(`ไม่สามารถวางกล่องที่ ${i + 1}/${box.quantity} ได้ เนื่องจากเกินน้ำหนักที่กำหนด!`);
@@ -1166,16 +1180,13 @@ function placeBoxesFromInside(boxes) {
                 let suitableBase = null;
                 let maxY = 0;
             
-                // กรองเฉพาะกล่องที่อยู่ในตำแหน่ง x,z ที่ซ้อนทับกัน
                 const potentialBases = occupiedSpace.filter(space =>
-                    x >= space.x && x + width <= space.x + space.width && // ตรวจสอบความกว้าง
-                    z >= space.z && z + length <= space.z + space.length // ตรวจสอบความยาว
+                    x >= space.x && x + width <= space.x + space.width &&
+                    z >= space.z && z + length <= space.z + space.length
                 );
             
-                // เรียงตามความสูง
                 potentialBases.sort((a, b) => (b.y + b.height) - (a.y + a.height));
             
-                // หากล่องฐานที่เหมาะสมที่สุด
                 for (const base of potentialBases) {
                     if (canStackOnBase(base, width, length, weight)) {
                         suitableBase = base;
@@ -1203,7 +1214,6 @@ function placeBoxesFromInside(boxes) {
                     if (baseY + boxHeight <= ConHeight &&
                         !checkCollision(x, baseY, z, boxWidth, boxLength, boxHeight)) {
 
-                        // คำนวณระยะห่างจากกล่องที่มีอยู่แล้ว
                         let totalGap = 0;
                         occupiedSpace.forEach(space => {
                             const xGap = Math.min(
@@ -1219,7 +1229,6 @@ function placeBoxesFromInside(boxes) {
                             }
                         });
 
-                        // อัพเดทตำแหน่งที่ดีที่สุด
                         if (totalGap < minGap) {
                             minGap = totalGap;
                             bestX = x;
@@ -1233,9 +1242,7 @@ function placeBoxesFromInside(boxes) {
                 if (minGap < 0) break;
             }
 
-            // ถ้าเจอตำแหน่งที่เหมาะสม
             if (minGap !== 0.0000001) {
-                // วางกล่อง
                 create3DModel(
                     boxWidth,
                     boxLength,
@@ -1247,7 +1254,6 @@ function placeBoxesFromInside(boxes) {
                     boxId
                 );
 
-                // บันทึกพื้นที่ที่ใช้
                 occupiedSpace.push({
                     x: bestX,
                     y: bestY,
