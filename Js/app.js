@@ -645,34 +645,45 @@ function getRandomColor() {
     return `#${color}`;
 }
 
-function addBox() {
-
+function addBox(boxuploadData = null) {
     const randomColor = getRandomColor();
+    
+    // ถ้า boxData ไม่เป็น null (ได้รับข้อมูลจาก upload) ใช้ข้อมูลใน boxData, หากไม่มีก็ใช้ค่าพื้นฐาน
+    const boxID = boxuploadData ? boxuploadData.boxId || `Box ${boxCounter}` : `Box ${boxCounter}`;
+    const boxWidth = boxuploadData ? boxuploadData.width || '100' : '100';
+    const boxLength = boxuploadData ? boxuploadData.length || '100' : '100';
+    const boxHeight = boxuploadData ? boxuploadData.height || '100' : '100';
+    const boxWeight = boxuploadData ? boxuploadData.weight || '10' : '10';
+    const boxQuantity = boxuploadData ? boxuploadData.quantity || '1' : '1';
+    const boxColor = boxuploadData ? boxuploadData.color || randomColor : randomColor;
+
     const newBox = document.createElement("div");
     newBox.className = "box";
-    const defaultID = `Box ${boxCounter}`;
-    newBox.setAttribute('data-box-id', defaultID);
-    newBox.id = defaultID;
+    newBox.setAttribute('data-box-id', boxID);
+    newBox.id = boxID.replace(/\s+/g, '-');
 
     newBox.style.margin = "10px 0";
     newBox.style.padding = "20px";
     newBox.style.border = "1px solid #ccc";
     newBox.style.borderRadius = "5px";
-    newBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)"; // เพิ่มเงาให้ดูนุ่มนวล
-    newBox.style.background = `linear-gradient(to right, #ffffff 90%, ${randomColor} 10%)`;
+    newBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+    newBox.style.background = `linear-gradient(to right, #ffffff 90%, ${boxColor} 10%)`;
     newBox.style.borderTopRightRadius = "15px";
     newBox.style.borderBottomRightRadius = "15px";
     newBox.style.cursor = "pointer";
-    newBox.style.position = "relative"; // สำหรับจัดตำแหน่งแถบสี
+    newBox.style.position = "relative";
 
     const boxContent = document.createElement("div");
     boxContent.style.marginRight = "50px";
     boxContent.innerHTML = `
-        <div style="font-family: 'Arial', sans-serif; color: #333;"><strong>${defaultID}</strong></div>
-        <div style="font-family: 'Arial', sans-serif; font-size:16px; color: #666;">100cm x 100cm x 100cm x 10kg x 1unit</div>
+        <div style="font-family: 'Arial', sans-serif; color: #333;"><strong>${boxID}</strong></div>
+        <div style="font-family: 'Arial', sans-serif; font-size:16px; color: #666;">
+            ${boxWidth}cm x ${boxLength}cm x ${boxHeight}cm x ${boxWeight}kg x ${boxQuantity}unit
+        </div>
     `;
     newBox.appendChild(boxContent);
     document.getElementById("boxContent").appendChild(newBox);
+
     const editForm = document.createElement("div");
     editForm.className = "editForm";
     editForm.style.display = "none";
@@ -681,18 +692,18 @@ function addBox() {
     newBox.appendChild(editForm);
 
     // สร้าง input fields สำหรับแก้ไขข้อมูล
-    const idInput = createInput('Item Name:', defaultID);
-    const widthInput = createInput('Width(cm):', '100');
-    const lengthInput = createInput('Length(cm):', '100');
-    const heightInput = createInput('Height(cm):', '100');
-    const weightInput = createInput('Weight(kg):', '10');
-    const quantityInput = createInput('Count:', '1');
-    const colorInput = createColorInput('', randomColor);
+    const idInput = createInput('Item Name:', boxID);
+    const widthInput = createInput('Width(cm):', boxWidth);
+    const lengthInput = createInput('Length(cm):', boxLength);
+    const heightInput = createInput('Height(cm):', boxHeight);
+    const weightInput = createInput('Weight(kg):', boxWeight);
+    const quantityInput = createInput('Count:', boxQuantity);
+    const colorInput = createColorInput('', boxColor);
 
-    // สร้างปุ่มบันทึกและลบ
+    // ปุ่มบันทึก
     const saveButton = document.createElement("button");
-    saveButton.innerHTML = '✓'; // เปลี่ยนเป็นเครื่องหมายถูก
-    saveButton.style.backgroundColor = '#3b82f6'; // สีฟ้า
+    saveButton.innerHTML = '✓';
+    saveButton.style.backgroundColor = '#3b82f6';
     saveButton.style.color = 'white';
     saveButton.style.border = 'none';
     saveButton.style.borderRadius = '8px';
@@ -706,10 +717,10 @@ function addBox() {
         newBox.setAttribute('data-box-id', newID);
         newBox.id = newID.replace(/\s+/g, '-');
         boxContent.querySelector('strong').textContent = newID;
-        saveBoxData(newBox, widthInput, lengthInput, heightInput, weightInput, quantityInput, colorInput, editForm, defaultID);
+        saveBoxData(newBox, widthInput, lengthInput, heightInput, weightInput, quantityInput, colorInput, editForm, boxID);
     });
 
-    // อัพเดท: สไตล์ปุ่มลบ
+    // ปุ่มลบ
     const deleteButton = document.createElement("button");
     deleteButton.innerHTML = '🗑️';
     deleteButton.style.backgroundColor = 'transparent';
@@ -733,7 +744,7 @@ function addBox() {
     editForm.appendChild(saveButton);
     editForm.appendChild(deleteButton);
 
-    // เพิ่ม event listener สำหรับการคลิก
+    // Event listener สำหรับเปิด-ปิดฟอร์มแก้ไข
     newBox.addEventListener('click', function(event) {
         if (event.target.tagName !== "INPUT" && event.target.tagName !== "BUTTON") {
             toggleEditForm(editForm);
@@ -743,6 +754,7 @@ function addBox() {
     document.getElementById("boxContent").appendChild(newBox);
     boxCounter++;
 }
+
 
 function savelist() {
     const containerNameInput = document.getElementById('container-name');
@@ -1517,31 +1529,90 @@ function captureAndSave(containerId) {
     camera.rotation.copy(currentRotation);
 }
 
+function showNotification(message) {
+    const notification = document.createElement("div");
+    notification.classList.add("notification");
+    
+    // เพิ่มไอคอนติ๊กถูกสีเขียว
+    const checkIcon = document.createElement("span");
+    checkIcon.classList.add("check-icon");
+    checkIcon.innerHTML = "✓"; // ติ๊กถูกสีเขียว
 
-function upload(boxes) {
+    // เพิ่มข้อความ
+    const textNode = document.createTextNode(message);
+    
+    // เพิ่มไอคอนติ๊กถูกและข้อความลงใน notification
+    notification.appendChild(checkIcon);
+    notification.appendChild(textNode);
+
+    // เพิ่มไปที่ body
+    document.body.appendChild(notification);
+
+    // แสดงแจ้งเตือน (เลื่อนขึ้น)
+    setTimeout(() => {
+        notification.classList.add("show");
+    }, 100);
+
+    // หลังจาก 2 วินาที จะเริ่มจางหายไป
+    setTimeout(() => {
+        notification.classList.add("hide");
+    }, 3000); // จางหายหลัง 3 วินาที
+
+    // ลบแจ้งเตือนหลังจากจางหาย
+    setTimeout(() => {
+        notification.remove();
+    }, 3500); // ลบหลังจาก 3.5 วินาที
+}
+
+function upload(boxes, containerNameInput) {
+    if (!boxes || typeof boxes !== "string") {
+        console.error("No valid boxes data provided.");
+        return; // ถ้าไม่มีข้อมูล จะไม่ทำงาน
+    }
+
+    // ลบกล่องเก่าทั้งหมดก่อนที่จะเพิ่มกล่องใหม่
+    clearOldBoxes();
+
     try {
-        // ถ้าข้อมูลเป็น String ที่มี &#34; ให้แปลงกลับ
-        let decodedBoxes = JSON.parse(boxes.replace(/&#34;/g, '"'));
+        boxes = boxes.replace(/&#34;/g, '"');
+        let decodedBoxes = JSON.parse(boxes);
 
-        console.log("Uploading boxesxxxxxxxxxxxxxxxxxxxxxxxx:", decodedBoxes);
-        
-        // ทำสิ่งที่ต้องการกับข้อมูล decodedBoxes เช่น วนลูปแสดงผล
-        decodedBoxes.forEach(box => {
-            console.log(`Container Name: ${box.namecontainer}`);
-            console.log(`Box Name: ${box.nameInput}`);
-            console.log(`Dimensions: ${box.width}x${box.length}x${box.height}`);
-            console.log(`Color: ${box.color}`);
-            console.log("------------");
-        });
+        console.log("Received boxes:", decodedBoxes);
 
+        if (Array.isArray(decodedBoxes)) {
+            decodedBoxes.forEach(boxData => {
+                console.log("Box Data:", JSON.stringify(boxData, null, 2)); // แสดงข้อมูลทั้งหมดในรูปแบบ JSON
+                if (boxData.nameInput === containerNameInput) {
+                    addBox(boxData); // เรียกฟังก์ชัน addBox สำหรับข้อมูลที่ตรงกัน
+                }
+            });
+            // แสดงแจ้งเตือนเมื่อการอัปโหลดเสร็จสิ้น
+            showNotification("Upload เสร็จสมบูรณ์");
+        } else {
+            console.error("Invalid box data format.");
+        }
     } catch (error) {
         console.error("Error parsing boxes:", error);
     }
 }
 
+
+function clearOldBoxes() {
+    const boxContent = document.getElementById("boxContent");
+    if (boxContent) {
+        // ลบเฉพาะกล่องที่ตรงตามเงื่อนไข
+        const boxes = boxContent.querySelectorAll(".box");
+        boxes.forEach(box => {
+            // ตัวอย่าง: ลบเฉพาะกล่องที่มี id เป็น 'Box 1'
+            if (box.id ) {
+                box.remove();
+            }
+        });
+    }
+}
+
 footerDetails(); // เรียกครั้งแรกเพื่อแสดงข้อมูลใน footer
 loadForms();
-upload();
 
 // ฟังก์ชันที่บังคับให้หน้าโหลดค้างเป็นเวลา 1 วินาที
 window.onload = function() {
