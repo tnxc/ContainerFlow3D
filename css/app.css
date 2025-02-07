@@ -711,3 +711,46 @@ input[type="number"]:focus {
 .notification.hide {
     opacity: 0;
 }
+
+/* สไตล์สำหรับการแสดงแจ้งเตือน */
+.notification {
+    position: fixed;
+    right: -5%;
+    bottom: 400px;
+    background-color: rgb(255, 255, 255); /* พื้นหลังเป็นสีขาว */
+    color: red;
+    padding: 15px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    opacity: 1;
+    transform: translateX(-50%) translateY(100%); /* เริ่มต้นที่ข้างล่างนอกหน้าจอ */
+    transition: transform 1s ease, opacity 1.5s ease; /* เลื่อนขึ้นและจางหายไป */
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); /* เพิ่มเงา */
+    border: 1px solid #ccc; /* เพิ่มกรอบเส้นบางๆ */
+}
+
+/* สไตล์ไอคอน "X" สีแดง */
+.notification .error-icon {
+    margin-right: 10px;
+    font-size: 20px;
+    color: red;
+}
+
+/* เมื่อแจ้งเตือนแสดงบนหน้าจอ */
+.notification.show {
+    transform: translateX(-50%) translateY(0); /* เลื่อนขึ้นมาจากด้านล่าง */
+}
+
+/* จางหายไป */
+.notification.hide {
+    opacity: 0;
+}
+
+/* คลาสสำหรับการแจ้งเตือนแบบ error */
+.notification.error {
+    background-color: rgba(255, 0, 0, 0.1); /* พื้นหลังเป็นสีแดงอ่อน */
+    color: red;
+}

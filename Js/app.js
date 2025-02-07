@@ -1571,6 +1571,41 @@ function showNotification(message) {
     }, 3500); // ลบหลังจาก 3.5 วินาที
 }
 
+function showErrorNotification(message) {
+    const notification = document.createElement("div");
+    notification.classList.add("notification", "error");
+
+    // เพิ่มไอคอน "X" สีแดง
+    const errorIcon = document.createElement("span");
+    errorIcon.classList.add("error-icon");
+    errorIcon.innerHTML = "&#10006;"; // สัญลักษณ์ "X" สีแดง
+
+    // เพิ่มข้อความ
+    const textNode = document.createTextNode(message);
+
+    // เพิ่มไอคอน "X" และข้อความลงใน notification
+    notification.appendChild(errorIcon);
+    notification.appendChild(textNode);
+
+    // เพิ่มไปที่ body
+    document.body.appendChild(notification);
+
+    // แสดงแจ้งเตือน (เลื่อนขึ้น)
+    setTimeout(() => {
+        notification.classList.add("show");
+    }, 100);
+
+    // หลังจาก 2 วินาที จะเริ่มจางหายไป
+    setTimeout(() => {
+        notification.classList.add("hide");
+    }, 3000); // จางหายหลัง 3 วินาที
+
+    // ลบแจ้งเตือนหลังจากจางหาย
+    setTimeout(() => {
+        notification.remove();
+    }, 3500); // ลบหลังจาก 3.5 วินาที
+}
+
 function upload(boxes, containerNameInput) {
     if (!boxes || typeof boxes !== "string") {
         console.error("No valid boxes data provided.");
@@ -1596,7 +1631,7 @@ function upload(boxes, containerNameInput) {
             // แสดงแจ้งเตือนเมื่อการอัปโหลดเสร็จสิ้น
             showNotification("Upload เสร็จสมบูรณ์");
         } else {
-            console.error("Invalid box data format.");
+            showErrorNotification(ชื่อซ้ำกัน);
         }
     } catch (error) {
         console.error("Error parsing boxes:", error);
