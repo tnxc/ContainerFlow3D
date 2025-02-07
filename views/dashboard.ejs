@@ -148,7 +148,8 @@
                                 <%= new Date(container.createdDate).toLocaleString() %>
                             </td>
                             <td class="actions">
-                                <button class="icon-btn export-btn uploadButton" data-container-name-input="<%= container.nameInput %>">
+                                <button class="icon-btn export-btn uploadButton"
+                                    data-container-name-input="<%= container.nameInput %>">
                                     <i class="fas fa-file-export"></i>
                                 </button>
                                 <button class="icon-btn delete-btn" onclick="deleteData('<%= container.nameInput %>')">
@@ -173,17 +174,24 @@
 
     <button id="manageButton" onclick="manageAction()">Manage</button>
 
+
+
+    <script>
+        // รับค่าตัวแปรจาก Server
+        const userId = "<%= userId %>";
+
+    </script>
     <script>
         // รับค่าตัวแปรจาก Server
         const boxes = '<%= boxes %>';
-    
+
         // รอการกดปุ่มเพื่อเรียกฟังก์ชัน upload
         document.addEventListener('DOMContentLoaded', function () {
             // เลือกปุ่มทั้งหมดที่มีคลาส uploadButton
             document.querySelectorAll('.uploadButton').forEach(button => {
                 button.addEventListener('click', function () {
                     const containerNameInput = button.dataset.containerNameInput;
-        
+
                     if (typeof upload === 'function') {
                         upload(boxes, containerNameInput); // ส่งค่าตัวแปร boxes และ containerNameInput ไปยังฟังก์ชัน upload
                     } else {
@@ -196,7 +204,6 @@
     <script>
         // รับค่า userName จากฝั่งเซิร์ฟเวอร์
         const userName = '<%= userName %>';
-        const userId = "<%= userId %>";
 
         // แสดงชื่อใน Dropdown หรือที่ต้องการ
         document.addEventListener('DOMContentLoaded', () => {

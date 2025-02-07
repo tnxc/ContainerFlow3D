@@ -1,35 +1,25 @@
-const User = require('../models/User'); // เรียกใช้งาน Model ของ User
-
+const User = require('../models/User'); 
 module.exports = (req, res) => {
-    const { email, password } = req.body; // รับค่า email และ password จากฟอร์ม
-
-    // ค้นหาผู้ใช้ที่มีอีเมลตรงกับที่กรอก
+    const { email, password } = req.body;
     User.findOne({ email: email })
         .then((user) => {
-            console.log("user is",user); // ตรวจสอบผลลัพธ์เพื่อดูข้อมูลผู้ใช้
-
             if (user) {
-                // ตรวจสอบรหัสผ่าน
-                if (password === user.password) {
-                    // หากล็อกอินสำเร็จ จัดเก็บข้อมูลที่จำเป็นใน session
-                    req.session.userId = user._id;  // เก็บ userId ใน session
-                    req.session.userName = `${user.firstname} ${user.lastname}`; // เก็บชื่อเต็มใน session
 
-                    // รีไดเร็กต์ไปยังหน้า Dashboard
+                if (password === user.password) {
+                    req.session.userId = user._id; 
+                    req.session.userName = `${user.firstname} ${user.lastname}`;
                     res.redirect('/dashboard');
                 } else {
-                    // หากรหัสผ่านไม่ตรง ให้กลับไปที่หน้า Login พร้อมข้อความแจ้งเตือน
                     req.flash('error', 'Incorrect password. Please try again.');
                     res.redirect('/login');
                 }
             } else {
-                // หากไม่พบผู้ใช้ ให้กลับไปที่หน้า Login พร้อมข้อความแจ้งเตือน
                 req.flash('error', 'User not found. Please check your email.');
                 res.redirect('/login');
             }
         })
         .catch((error) => {
-            console.error(error); // แสดงข้อผิดพลาด
+            console.error(error);
             res.status(500).send('Internal Server Error');
         });
 };
