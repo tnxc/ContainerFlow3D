@@ -718,7 +718,7 @@ input[type="number"]:focus {
     right: -5%;
     bottom: 400px;
     background-color: rgb(255, 255, 255); /* พื้นหลังเป็นสีขาว */
-    color: red;
+    color: green;
     padding: 15px 20px;
     border-radius: 5px;
     font-size: 16px;

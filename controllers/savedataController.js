@@ -7,11 +7,8 @@ module.exports = async (req, res) => {
         if (!Array.isArray(saveDataList) || saveDataList.length === 0) {
             return res.status(400).json({ success: false, message: 'No data received' });
         }
-
-        // ดึง nameInput ทั้งหมดจาก request
+        
         const nameInputs = saveDataList.map(data => data.nameInput);
-
-        // ตรวจสอบค่าซ้ำกันภายใน request เอง
         const uniqueNameInputs = [...new Set(nameInputs)];
         if (uniqueNameInputs.length > 1) {
             return res.status(400).json({ success: false, message: 'Multiple nameInput values are not allowed in one request' });
