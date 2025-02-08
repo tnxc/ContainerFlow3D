@@ -800,22 +800,21 @@ function savelist() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert("Data saved successfully!");
-            window.location.reload();
+            showNotification("Upload เสร็จสมบูรณ์");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
             containerNameInput.value = "";
         } else {
-            alert(`❌ Error: ${data.message}`); // แจ้งเตือนหากชื่อซ้ำกัน
+            console.log(`Error: ${data.message}`);
+            console.error('Error saving data:', error);
         }
     })
-    .catch(error => {
-        console.error('Error saving data:', error);
-        alert("⚠ An error occurred while saving data.");
-    });   
 }
 
 
 async function deleteData(nameInput) {
-    if (!confirm(`Are you sure you want to delete containers named "${nameInput}"?`)) return;
+    if (!confirm(`Are you sure you want to delete containers name "${nameInput}"?`)) return;
 
     try {
         const response = await fetch('/delete-container', {
@@ -827,14 +826,15 @@ async function deleteData(nameInput) {
         const result = await response.json();
 
         if (result.success) {
-            alert('Container deleted successfully');
-            location.reload(); // รีเฟรชหน้าเพื่ออัปเดตข้อมูล
+            showNotification("Container Delete success");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } else {
-            alert(result.error);
+            console.log(result.error);
         }
     } catch (error) {
         console.error('Error deleting data:', error);
-        alert('Error deleting container');
     }
 }
 
@@ -993,21 +993,52 @@ function create3DModel(width, length, height, x, y, z, color, boxId) {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
 
-        canvas.width = 512;
-        canvas.height = 512;
+        // ขยาย Canvas เพื่อให้รองรับตัวอักษรใหญ่ขึ้น
+        canvas.width = 1024;
+        canvas.height = 1024;
 
         // เติมสีพื้นหลังให้เหมือนกล่อง
-        context.fillStyle = boxColor; // ใช้สีเดียวกับกล่อง
+        context.fillStyle = boxColor;
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        // ตั้งค่าฟอนต์และสีของข้อความ
-        context.font = `bold ${fontSize || 64}px Arial`;
-        context.fillStyle = '#000000'; // สีของตัวอักษร (ดำ)
+        // กำหนดขนาดฟอนต์ให้ใหญ่ขึ้น
+        fontSize = fontSize || 160; // ปรับขนาดใหญ่ขึ้น (เดิม 64px)
+        context.font = `bold ${fontSize}px Arial`;
+        context.fillStyle = '#000000';
         context.textAlign = 'center';
-        context.textBaseline = 'middle';
+        context.textBaseline = 'top';
 
-        // วาดข้อความไว้ตรงกลาง Canvas
-        context.fillText(text, canvas.width / 2, canvas.height / 2);
+        // ฟังก์ชันตัดข้อความเป็นหลายบรรทัด
+        function wrapText(text, maxWidth) {
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                let testLine = currentLine + ' ' + words[i];
+                let testWidth = context.measureText(testLine).width;
+
+                if (testWidth > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // คำนวณการตัดคำ
+        const maxTextWidth = canvas.width * 0.9; // ใช้พื้นที่มากขึ้น
+        const lines = wrapText(text, maxTextWidth);
+        const lineHeight = fontSize * 1.2;
+        const startY = (canvas.height - lineHeight * lines.length) / 2;
+
+        // วาดข้อความทีละบรรทัด
+        lines.forEach((line, index) => {
+            context.fillText(line, canvas.width / 2, startY + index * lineHeight);
+        });
 
         // สร้าง Texture จาก Canvas
         const texture = new THREE.CanvasTexture(canvas);
@@ -1016,22 +1047,22 @@ function create3DModel(width, length, height, x, y, z, color, boxId) {
         return texture;
     }
 
-    // สร้างพื้นผิวข้อความด้วยชื่อ boxId สำหรับแต่ละด้าน
-    const textTextureFront = createTextTexture(boxId, color,128);  // ด้านหน้า
-    const textTextureBack = createTextTexture(boxId, color, 128);   // ด้านหลัง
-    const textTextureTop = createTextTexture(boxId, color, 128);    // ด้านบน
-    const textTextureBottom = createTextTexture(boxId, color, 128); // ด้านล่าง
-    const textTextureLeft = createTextTexture(boxId, color, 128);   // ด้านซ้าย
-    const textTextureRight = createTextTexture(boxId, color, 128);  // ด้านขวา
+    // สร้างพื้นผิวข้อความสำหรับแต่ละด้าน
+    const textTextureFront = createTextTexture(boxId, color, 160);  
+    const textTextureBack = createTextTexture(boxId, color, 160);   
+    const textTextureTop = createTextTexture(boxId, color, 160);    
+    const textTextureBottom = createTextTexture(boxId, color, 160); 
+    const textTextureLeft = createTextTexture(boxId, color, 160);   
+    const textTextureRight = createTextTexture(boxId, color, 160);  
 
-    // สร้างวัสดุสำหรับแต่ละด้านของกล่อง
+    // สร้างวัสดุสำหรับแต่ละด้าน
     const materials = [
-        new THREE.MeshBasicMaterial({ map: textTextureFront }),  // ด้านหน้า
-        new THREE.MeshBasicMaterial({ map: textTextureBack }),   // ด้านหลัง
-        new THREE.MeshBasicMaterial({ map: textTextureTop }),    // ด้านบน
-        new THREE.MeshBasicMaterial({ map: textTextureBottom }), // ด้านล่าง
-        new THREE.MeshBasicMaterial({ map: textTextureLeft }),   // ด้านซ้าย
-        new THREE.MeshBasicMaterial({ map: textTextureRight }),  // ด้านขวา
+        new THREE.MeshBasicMaterial({ map: textTextureFront }),  
+        new THREE.MeshBasicMaterial({ map: textTextureBack }),   
+        new THREE.MeshBasicMaterial({ map: textTextureTop }),    
+        new THREE.MeshBasicMaterial({ map: textTextureBottom }), 
+        new THREE.MeshBasicMaterial({ map: textTextureLeft }),   
+        new THREE.MeshBasicMaterial({ map: textTextureRight }),  
     ];
 
     // สร้างกล่อง
@@ -1051,6 +1082,7 @@ function create3DModel(width, length, height, x, y, z, color, boxId) {
     createdModels.push(cube);
     createdModels.push(line);
 }
+
 
 function clearPreviousModels() {
     // ลบโมเดลเก่าที่มีอยู่ใน createdModels
@@ -1488,26 +1520,54 @@ function captureAndSave(containerId) {
     // กำหนดมุมที่ต้องการถ่ายภาพตามเงื่อนไข
     let cameraViews;
     const container = containerData.find(c => c.id === containerId); // ค้นหา container ตาม ID
-    if (container && container.length >= 12) {
-        // ชุดมุมมองกล้องเมื่อ container.length > 12
-        cameraViews = [
-            { position: [0, 3, 30], rotation: [0, 0, 0] },
-            { position: [0, 7, -35], rotation: [-3.08, 0, -3.14] },
-            { position: [-40, 5, 1.5], rotation: [-1.5, -1.5, -1.5] },
-            { position: [40, 5.9, 0.5], rotation: [-1.5, 1.4, 1.5] },
-            { position: [35, 15, 21], rotation: [-0.5, 0.72, 0.37] },
-            { position: [38, 15, -16], rotation: [-2.4, 0.82, 2.57] }
-        ];
-    } else {
-        // ชุดมุมมองกล้องเดิม
-        cameraViews = [
-            { position: [0, 3, 20], rotation: [0, 0, 0] },
-            { position: [0, 4, -20], rotation: [-3.08, 0, -3.14] },
-            { position: [-25, 5, 0], rotation: [-1.5, -1.5, -1.5] },
-            { position: [25, 5.9, 0], rotation: [-1.5, 1.4, 1.5] },
-            { position: [25.5, 15.25, 16.5], rotation: [-0.5, 0.77, 0.37] },
-            { position: [22.5, 14.45, -11.7], rotation: [-2.4, 0.87, 2.57] }
-        ];
+
+    if (container) {
+        if (container.length >= 16) {
+            cameraViews = [
+                { position: [0, 5, 40], rotation: [0, 0, 0] },
+                { position: [0.1, 9, -45], rotation: [-3.08, 0, -3.14] },
+                { position: [-57.61, 10.56, 0.21], rotation: [-1.45, -1.43, -1.45] },
+                { position: [57.32, 11.37, -0.15], rotation: [-1.58, 1.37, 1.58] },
+                { position: [40, 18, 25], rotation: [-0.5, 0.72, 0.37] },
+                { position: [45, 18, -20], rotation: [-2.4, 0.82, 2.57] }
+            ];
+        } else if (container.length >= 12) {
+            cameraViews = [
+                { position: [0, 3, 30], rotation: [0, 0, 0] },
+                { position: [0.1, 7, -35], rotation: [-3.08, 0, -3.14] },
+                { position: [-42.65, 6.01, 0.01], rotation: [-1.62, -1.43, -1.62] },
+                { position: [42.56, 5.87, 0.17], rotation: [-1.54, 1.43, 1.54] },
+                { position: [35, 15, 21], rotation: [-0.5, 0.72, 0.37] },
+                { position: [38, 15, -16], rotation: [-2.4, 0.82, 2.57] }
+            ];
+        } else if (container.length >= 9) {
+            cameraViews = [
+                { position: [0, 7, 25], rotation: [0, 0, 0] },
+                { position: [0.1, 6, -30], rotation: [-3.08, 0, -3.14] },
+                { position: [-32.68, 12.51, -0.30], rotation: [-1.59, -1.21, -1.60] },
+                { position: [37.48, 10.16, -0.28], rotation: [-1.58, 1.36, 1.58] },
+                { position: [30, 14, 18], rotation: [-0.5, 0.72, 0.37] },
+                { position: [-34.88, 21.60, 15.48], rotation: [-1.03, -0.73, -0.84] }
+            ];
+        } else if (container.length >= 6) {
+            cameraViews = [
+                { position: [-0.03, 11.52, 23.06], rotation: [-0.28, 0.01, 0.00] },
+                { position: [0.18,  14.40, -20.45], rotation: [-2.64, -0.00, -3.14] },
+                { position: [-27, 13.52, -0.38], rotation: [-1.58, -1.07, -1.58] },
+                { position: [27.34, 12.35, -0.25], rotation: [-1.59, 1.15, 1.59] },
+                { position: [28, 12, 15], rotation: [-0.5, 0.77, 0.37] },
+                { position: [-25.34, 16.27, 9.32], rotation: [-1.11, -0.82, -0.97] }
+            ];
+        } else {
+            cameraViews = [
+                { position: [0, 8.5, 20], rotation: [-0.2, 0, 0] },
+                { position: [0.12, 7.28 , -22.18], rotation: [-2.97, 0.01, 3.14] },
+                { position: [-28.42, 9.62, 0.11], rotation: [-1.56, -1.24, -1.56] },
+                { position: [28.48, 9.43, -0.07], rotation: [-1.58, 1.25, 1.58] },
+                { position: [25.5, 15.25, 16.5], rotation: [-0.5, 0.77, 0.37] },
+                { position: [22.5, 14.45, -11.7], rotation: [-2.4, 0.87, 2.57] }
+            ];
+        }
     }
 
     // ทำการวนลูปถ่ายภาพตามมุมมองที่กำหนด

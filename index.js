@@ -64,6 +64,6 @@ app.put('/user/update', authMiddleware, updateUserController);
 app.post('/save-data', authMiddleware, saveDataController);
 app.post('/delete-container', deleteContainer);
 
-app.listen(10000, () =>{
-    console.log("app listening on http://localhost:10000")
+app.listen(4000, () =>{
+    console.log("app listening on http://localhost:4000")
 }) 
