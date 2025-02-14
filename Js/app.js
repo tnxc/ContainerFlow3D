@@ -1122,6 +1122,7 @@ function saveBoxData(boxElement, widthInput, lengthInput, heightInput, weightInp
     editForm.style.display = "none";
 }
 
+
 function placeBoxesFromInside(boxes) {
     if (!currentContainerId) {
         console.error("No container selected. Please load a container first.");
@@ -1153,12 +1154,104 @@ function placeBoxesFromInside(boxes) {
     let currentY = gridHelper.position.y;
     let currentZ = -ConDepth / 2;
 
-    // เรียงกล่องตามขนาดพื้นที่ (กว้าง x ยาว) จากมากไปน้อย
+    // เรียงกล่องตามความสูงจากมากไปน้อย
     boxes.sort((a, b) => {
         const areaA = parseFloat(a.width) * parseFloat(a.length);
         const areaB = parseFloat(b.width) * parseFloat(b.length);
         return areaB - areaA;
     });
+
+    // ฟังก์ชันตรวจสอบการชนกัน
+    const checkCollision = (x, y, z, width, height, length) => {
+        return occupiedSpace.some(space => 
+            x < space.x + space.width &&
+            x + width > space.x &&
+            z < space.z + space.length &&
+            z + length > space.z &&
+            y < space.y + space.height &&
+            y + height > space.y
+        );
+    };
+
+    // ฟังก์ชันหาความสูงที่สามารถวางได้ที่ตำแหน่ง x, z
+    const findAvailableHeight = (x, z, width, length, boxWeight) => {
+        const baseBoxes = occupiedSpace.filter(space =>
+            !(x + width <= space.x || 
+              x >= space.x + space.width ||
+              z + length <= space.z ||
+              z >= space.z + space.length)
+        );
+    
+        if (baseBoxes.length > 0) {
+            const maxHeight = Math.max(...baseBoxes.map(box => box.y + box.height));
+            const totalBaseWeight = baseBoxes.reduce((sum, box) => sum + box.weightCapacity, 0);
+    
+            if (boxWeight > totalBaseWeight) {
+                return null; // ถ้าน้ำหนักมากกว่าฐานทั้งหมด ห้ามวาง
+            }
+            return maxHeight;
+        }
+        
+        return currentY; // วางที่พื้น
+    };
+
+    // ฟังก์ชันหา X positions ที่เป็นไปได้ (จากขอบกล่องที่มีอยู่)
+    const getPossibleXPositions = () => {
+        const positions = new Set([currentX]);
+        occupiedSpace.forEach(space => {
+            positions.add(space.x + space.width); // ขอบขวาของกล่องที่มีอยู่
+        });
+        return Array.from(positions).sort((a, b) => a - b);
+    };
+
+    // ฟังก์ชันหา Z positions ที่เป็นไปได้ (จากขอบกล่องที่มีอยู่)
+    const getPossibleZPositions = () => {
+        const positions = new Set([currentZ]);
+        occupiedSpace.forEach(space => {
+            positions.add(space.z + space.length); // ขอบหน้าของกล่องที่มีอยู่
+        });
+        return Array.from(positions).sort((a, b) => a - b);
+    };
+    
+
+    // ฟังก์ชันหาตำแหน่งที่เหมาะสมสำหรับการวางกล่อง
+    const findBestPosition = (boxWidth, boxLength, boxHeight, boxWeight) => {
+        const xPositions = getPossibleXPositions();
+        const zPositions = getPossibleZPositions();
+        
+        for (const x of xPositions) {
+            if (x + boxWidth > ConWidth / 2) continue;
+            
+            for (const z of zPositions) {
+                if (z + boxLength > ConDepth / 2) continue;
+                
+                let y = findAvailableHeight(x, z, boxWidth, boxLength, boxWeight);
+                if (y === null) continue; // ถ้าฐานรับน้ำหนักไม่ได้ ให้ข้ามไปตำแหน่งอื่น
+                
+                while (y + boxHeight <= ConHeight) {
+                    if (!checkCollision(x, y, z, boxWidth, boxHeight, boxLength)) {
+                        return { x, y, z };
+                    }
+    
+                    // คำนวณหาความสูงถัดไป
+                    const nextHeight = occupiedSpace
+                        .filter(space => 
+                            space.y + space.height > y &&
+                            !(x + boxWidth <= space.x || 
+                              x >= space.x + space.width ||
+                              z + boxLength <= space.z ||
+                              z >= space.z + space.length)
+                        )
+                        .map(space => space.y + space.height);
+    
+                    if (nextHeight.length === 0) break;
+                    y = Math.min(...nextHeight);
+                }
+            }
+        }
+        
+        return null;
+    };
 
     boxes.forEach((box) => {
         const boxId = box.boxId;
@@ -1168,15 +1261,8 @@ function placeBoxesFromInside(boxes) {
         const boxWeight = parseFloat(box.weight);
         const boxColor = box.color || "#808080";
 
-        // เพิ่มการตรวจสอบขนาดของกล่องเทียบกับ container
-        if (boxWidth > ConWidth || boxLength > ConDepth) {
-            console.error(`กล่อง ID: ${boxId} มีขนาดใหญ่เกินกว่า container (กว้าง: ${boxWidth}, ยาว: ${boxLength})`);
-            unplacedBoxes += box.quantity;
-            return;
-        }
-
-        if (boxHeight > ConHeight) {
-            console.error(`กล่อง ID: ${boxId} มีความสูงเกินกว่า container (สูง: ${boxHeight})`);
+        if (boxWidth > ConWidth || boxLength > ConDepth || boxHeight > ConHeight) {
+            console.error(`กล่อง ID: ${boxId} มีขนาดใหญ่เกินกว่า container`);
             unplacedBoxes += box.quantity;
             return;
         }
@@ -1185,111 +1271,27 @@ function placeBoxesFromInside(boxes) {
             if (totalWeight + boxWeight > ConCap) {
                 console.warn(`ไม่สามารถวางกล่องที่ ${i + 1}/${box.quantity} ได้ เนื่องจากเกินน้ำหนักที่กำหนด!`);
                 unplacedBoxes++;
-                return;
+                continue;
             }
 
-            let placed = false;
+            const position = findBestPosition(boxWidth, boxLength, boxHeight, boxWeight);
 
-            // ฟังก์ชันตรวจสอบการชนกัน
-            const checkCollision = (x, y, z, width, length, height) => {
-                return occupiedSpace.some((space) =>
-                    x < space.x + space.width &&
-                    x + width > space.x &&
-                    z < space.z + space.length &&
-                    z + length > space.z &&
-                    y < space.y + space.height &&
-                    y + height > space.y
-                );
-            };
-
-            // ฟังก์ชันตรวจสอบว่าสามารถวางกล่องซ้อนบนกล่องฐานได้หรือไม่
-            const canStackOnBase = (baseBox, newWidth, newLength, newWeight) => {
-                return newWidth <= baseBox.width && newLength <= baseBox.length && newWeight <= baseBox.weightCapacity;
-            };
-
-            // ฟังก์ชันหาความสูงที่เหมาะสมและกล่องฐานที่เหมาะสม
-            const findSuitableBase = (x, z, width, length, weight) => {
-                let suitableBase = null;
-                let maxY = 0;
-            
-                const potentialBases = occupiedSpace.filter(space =>
-                    x >= space.x && x + width <= space.x + space.width &&
-                    z >= space.z && z + length <= space.z + space.length
-                );
-            
-                potentialBases.sort((a, b) => (b.y + b.height) - (a.y + a.height));
-            
-                for (const base of potentialBases) {
-                    if (canStackOnBase(base, width, length, weight)) {
-                        suitableBase = base;
-                        maxY = base.y + base.height;
-                        break;
-                    }
-                }
-            
-                return { suitableBase, maxY };
-            };
-
-            // หาพื้นที่ว่างที่เล็กที่สุดที่สามารถวางกล่องได้
-            let bestX = currentX;
-            let bestZ = currentZ;
-            let bestY = currentY;
-            let minGap = Infinity;
-            let bestBase = null;
-
-            // ลองวางกล่องในแต่ละตำแหน่ง
-            for (let x = currentX; x + boxWidth <= ConWidth / 2; x += 0.1) {
-                for (let z = currentZ; z + boxLength <= ConDepth / 2; z += 0.1) {
-                    const { suitableBase, maxY } = findSuitableBase(x, z, boxWidth, boxLength, boxWeight);
-                    const baseY = suitableBase ? maxY : currentY;
-
-                    if (baseY + boxHeight <= ConHeight &&
-                        !checkCollision(x, baseY, z, boxWidth, boxLength, boxHeight)) {
-
-                        let totalGap = 0;
-                        occupiedSpace.forEach(space => {
-                            const xGap = Math.min(
-                                Math.abs(x - (space.x + space.width)),
-                                Math.abs((x + boxWidth) - space.x)
-                            );
-                            const zGap = Math.min(
-                                Math.abs(z - (space.z + space.length)),
-                                Math.abs((z + boxLength) - space.z)
-                            );
-                            if (xGap < 0 || zGap < 0) {
-                                totalGap += xGap + zGap;
-                            }
-                        });
-
-                        if (totalGap < minGap) {
-                            minGap = totalGap;
-                            bestX = x;
-                            bestZ = z;
-                            bestY = baseY;
-                            bestBase = suitableBase;
-                            if (minGap < 0) break;
-                        }
-                    }
-                }
-                if (minGap < 0) break;
-            }
-
-            if (minGap !== 0.0000001) {
+            if (position) {
                 create3DModel(
                     boxWidth,
                     boxLength,
                     boxHeight,
-                    bestX + boxWidth / 2,
-                    bestY,
-                    bestZ + boxLength / 2,
+                    position.x + boxWidth / 2,
+                    position.y,
+                    position.z + boxLength / 2,
                     boxColor,
                     boxId
                 );
 
                 occupiedSpace.push({
-                    x: bestX,
-                    y: bestY,
-                    z: bestZ,
+                    x: position.x,
+                    y: position.y,
+                    z: position.z,
                     width: boxWidth,
                     height: boxHeight,
                     length: boxLength,
@@ -1298,7 +1300,6 @@ function placeBoxesFromInside(boxes) {
                 });
 
                 totalWeight += boxWeight;
-                placed = true;
                 placedBoxes++;
 
                 placedBoxesData.push({
@@ -1311,17 +1312,9 @@ function placeBoxesFromInside(boxes) {
                     count: i + 1
                 });
 
-                console.log(`วางกล่อง ID: ${boxId} สำเร็จ ที่ตำแหน่ง x:${bestX}, y:${bestY}, z:${bestZ}`);
-
-                if (bestBase) {
-                    console.log(`วางซ้อนบนกล่อง ID: ${bestBase.id}`);
-                } else {
-                    console.log('วางบนพื้น');
-                }
-            }
-
-            if (!placed) {
-                console.log(`ไม่สามารถวางกล่อง ID: ${boxId} ได้`);
+                console.log(`วางกล่อง ID: ${boxId} สำเร็จ ที่ตำแหน่ง x:${position.x}, y:${position.y}, z:${position.z}`);
+            } else {
+                console.warn(`ไม่สามารถหาตำแหน่งที่เหมาะสมสำหรับกล่อง ID: ${boxId}`);
                 unplacedBoxes++;
             }
         }
@@ -1671,7 +1664,7 @@ function upload(boxes, containerNameInput) {
         console.error("No valid boxes data provided.");
         return; // ถ้าไม่มีข้อมูล จะไม่ทำงาน
     }
-
+    
     // ลบกล่องเก่าทั้งหมดก่อนที่จะเพิ่มกล่องใหม่
     clearOldBoxes();
 
@@ -1689,13 +1682,16 @@ function upload(boxes, containerNameInput) {
                 }
             });
             // แสดงแจ้งเตือนเมื่อการอัปโหลดเสร็จสิ้น
+            manageAction();
             showNotification("Upload เสร็จสมบูรณ์");
+            
         } else {
             showErrorNotification(ชื่อซ้ำกัน);
         }
     } catch (error) {
         console.error("Error parsing boxes:", error);
     }
+    
 }
 
 
