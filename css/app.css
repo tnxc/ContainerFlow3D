@@ -136,6 +136,7 @@ html {
 }
 
 #listContent {
+    
     display: none;
     position: absolute;
     top: 0;
@@ -145,10 +146,10 @@ html {
     background-color: #f0f0f0;
     width: 100%;
     /* ปรับให้เต็มความกว้างของหน้า */
-    height: 100vh;
+    height: 90vh;
     /* ครอบคลุมทั้งความสูงของหน้าจอ */
     animation: slideTop 0.5s forwards;
-    z-index: 5;
+    z-index: 10;
     margin-top: -28px;
     /* ขยับลงมาเพื่อไม่ให้บัง navbar */
     background-color: rgb(255, 255, 255);
@@ -162,6 +163,7 @@ html {
 
     /* ขอบมน */
     border-radius: 15px;
+    overflow-y: auto;
 }
 
 #ContainerDetail,
