@@ -58,7 +58,7 @@ app.get('/contact', redirectifAuth , contactController)
 app.post('/user/register', redirectifAuth , storeUserController)
 app.post('/user/login' , redirectifAuth , loginUserController)
 app.get('/logout', logoutController)
-app.get('/dashboard' , authMiddleware ,dashboardController)
+app.get('/dashboard' ,dashboardController)
 app.get('/report' , reportController)
 app.put('/user/update', authMiddleware, updateUserController);
 app.post('/save-data', authMiddleware, saveDataController);
