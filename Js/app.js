@@ -1162,6 +1162,7 @@ function placeBoxesFromInside(boxes) {
     });
 
     // ฟังก์ชันหาฐานรองรับที่ความสูง y
+    // ฟังก์ชันหาฐานรองรับที่ความสูง y
     const findBaseSupport = (y) => {
         const baseBoxes = occupiedSpace.filter(space => 
             Math.abs(space.y + space.height - y) < 0.001
@@ -1170,33 +1171,98 @@ function placeBoxesFromInside(boxes) {
         const bases = [];
         for (const box of baseBoxes) {
             let merged = false;
+            
+            // ลองรวมกับฐานที่มีอยู่
             for (const base of bases) {
-                // ตรวจสอบว่าสามารถรวมฐานได้หรือไม่
-                if (Math.abs(base.y - box.y) < 0.001 && 
-                    ((Math.abs(base.x + base.width - box.x) < 0.001 && 
-                      Math.abs(base.z - box.z) < 0.001 && 
-                      base.length === box.length) ||
-                     (Math.abs(base.z + base.length - box.z) < 0.001 && 
-                      Math.abs(base.x - box.x) < 0.001 && 
-                      base.width === box.width))) {
+                // เช็คว่าอยู่ที่ความสูงเดียวกัน
+                if (Math.abs(base.y - box.y) < 0.001) {
+                    // เช็คการชิดกันในแนว X
+                    const touchingX = Math.abs(base.x + base.width - box.x) < 0.001 || 
+                                    Math.abs(box.x + box.width - base.x) < 0.001;
                     
-                    // รวมฐาน
-                    if (Math.abs(base.x + base.width - box.x) < 0.001) {
-                        base.width += box.width;
+                    // เช็คการชิดกันในแนว Z
+                    const touchingZ = Math.abs(base.z + base.length - box.z) < 0.001 || 
+                                    Math.abs(box.z + box.length - base.z) < 0.001;
+                    
+                    // เช็คว่ามีการซ้อนทับในอีกแกนหนึ่ง
+                    const overlapX = Math.max(base.x, box.x) < Math.min(base.x + base.width, box.x + box.width);
+                    const overlapZ = Math.max(base.z, box.z) < Math.min(base.z + base.length, box.z + box.length);
+                    
+                    // ถ้าชิดกันในแนว X และมีการซ้อนทับในแนว Z
+                    if (touchingX && overlapZ) {
+                        // รวมฐานในแนว X
+                        const minX = Math.min(base.x, box.x);
+                        const maxX = Math.max(base.x + base.width, box.x + box.width);
+                        base.x = minX;
+                        base.width = maxX - minX;
+                        merged = true;
+                        break;
                     }
-                    if (Math.abs(base.z + base.length - box.z) < 0.001) {
-                        base.length += box.length;
+                    
+                    // ถ้าชิดกันในแนว Z และมีการซ้อนทับในแนว X
+                    if (touchingZ && overlapX) {
+                        // รวมฐานในแนว Z
+                        const minZ = Math.min(base.z, box.z);
+                        const maxZ = Math.max(base.z + base.length, box.z + box.length);
+                        base.z = minZ;
+                        base.length = maxZ - minZ;
+                        merged = true;
+                        break;
                     }
-                    merged = true;
-                    break;
                 }
             }
+            
             if (!merged) {
                 bases.push({...box});
             }
         }
+
+        // รวมฐานซ้ำจนกว่าจะไม่มีการเปลี่ยนแปลง
+        let basesChanged = true;
+        while (basesChanged) {
+            basesChanged = false;
+            for (let i = 0; i < bases.length; i++) {
+                for (let j = i + 1; j < bases.length; j++) {
+                    const base1 = bases[i];
+                    const base2 = bases[j];
+                    
+                    // เช็คการชิดกันและซ้อนทับเหมือนด้านบน
+                    const touchingX = Math.abs(base1.x + base1.width - base2.x) < 0.001 || 
+                                    Math.abs(base2.x + base2.width - base1.x) < 0.001;
+                    const touchingZ = Math.abs(base1.z + base1.length - base2.z) < 0.001 || 
+                                    Math.abs(base2.z + base2.length - base1.z) < 0.001;
+                    const overlapX = Math.max(base1.x, base2.x) < Math.min(base1.x + base1.width, base2.x + base2.width);
+                    const overlapZ = Math.max(base1.z, base2.z) < Math.min(base1.z + base1.length, base2.z + base2.length);
+                    
+                    if (touchingX && overlapZ) {
+                        // รวมฐานในแนว X
+                        const minX = Math.min(base1.x, base2.x);
+                        const maxX = Math.max(base1.x + base1.width, base2.x + base2.width);
+                        base1.x = minX;
+                        base1.width = maxX - minX;
+                        bases.splice(j, 1);
+                        basesChanged = true;
+                        break;
+                    }
+                    
+                    if (touchingZ && overlapX) {
+                        // รวมฐานในแนว Z
+                        const minZ = Math.min(base1.z, base2.z);
+                        const maxZ = Math.max(base1.z + base1.length, base2.z + base2.length);
+                        base1.z = minZ;
+                        base1.length = maxZ - minZ;
+                        bases.splice(j, 1);
+                        basesChanged = true;
+                        break;
+                    }
+                }
+                if (basesChanged) break;
+            }
+        }
+        
         return bases;
     };
+
 
     // ฟังก์ชันตรวจสอบการชนกัน
     const checkCollision = (x, y, z, width, height, length) => {
@@ -1236,31 +1302,33 @@ function placeBoxesFromInside(boxes) {
     };
 
     // ฟังก์ชันหา X positions ที่เป็นไปได้
-    const getPossibleXPositions = () => {
-        const positions = new Set([currentX]);
-        occupiedSpace.forEach(space => {
-            positions.add(space.x + space.width);
-        });
-        return Array.from(positions).sort((a, b) => a - b);
-    };
+const getPossibleXPositions = () => {
+    const positions = new Set([currentX]);
+    occupiedSpace.forEach(space => {
+        positions.add(space.x);  // เพิ่มตำแหน่ง x เริ่มต้น
+        positions.add(space.x + space.width);  // ตำแหน่งขอบขวา
+    });
+    return Array.from(positions).sort((a, b) => a - b);
+};
 
-    // ฟังก์ชันหา Z positions ที่เป็นไปได้
-    const getPossibleZPositions = () => {
-        const positions = new Set([currentZ]);
-        occupiedSpace.forEach(space => {
-            positions.add(space.z + space.length);
-        });
-        return Array.from(positions).sort((a, b) => a - b);
-    };
+// ฟังก์ชันหา Z positions ที่เป็นไปได้ (ปรับปรุงใหม่)
+const getPossibleZPositions = () => {
+    const positions = new Set([currentZ]);
+    occupiedSpace.forEach(space => {
+        positions.add(space.z);  // เพิ่มตำแหน่ง z เริ่มต้น
+        positions.add(space.z + space.length);  // ตำแหน่งขอบหลัง
+    });
+    return Array.from(positions).sort((a, b) => a - b);
+};
 
     // ฟังก์ชันหาตำแหน่งที่เหมาะสมสำหรับการวางกล่อง
     const findBestPosition = (boxWidth, boxLength, boxHeight, boxWeight) => {
         const xPositions = getPossibleXPositions();
-        const zPositions = getPossibleZPositions();
         
         for (const x of xPositions) {
             if (x + boxWidth > ConWidth / 2) continue;
             
+            const zPositions = getPossibleZPositions(x, boxWidth);
             for (const z of zPositions) {
                 if (z + boxLength > ConDepth / 2) continue;
                 
