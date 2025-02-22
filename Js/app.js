@@ -648,7 +648,6 @@ function getRandomColor() {
 function addBox(boxuploadData = null) {
     const randomColor = getRandomColor();
     
-    // ถ้า boxData ไม่เป็น null (ได้รับข้อมูลจาก upload) ใช้ข้อมูลใน boxData, หากไม่มีก็ใช้ค่าพื้นฐาน
     const boxID = boxuploadData ? boxuploadData.boxId || `Box ${boxCounter}` : `Box ${boxCounter}`;
     const boxWidth = boxuploadData ? boxuploadData.width || '100' : '100';
     const boxLength = boxuploadData ? boxuploadData.length || '100' : '100';
@@ -762,11 +761,9 @@ function savelist() {
     const boxes = document.querySelectorAll('.box'); 
     const SaveDataList = [];
     
-    // ดึงชื่อ container จาก footer หรือ input
     const containerDisplayName = document.querySelector('#FooterDetails td:nth-child(2) div:first-child')?.innerText.trim();
     const namecontainer = containerDisplayName;
 
-    // ✅ ใช้ userId ที่ได้จากเซิร์ฟเวอร์
     const userId = window.userId;
 
     boxes.forEach((box) => {
@@ -778,7 +775,7 @@ function savelist() {
         const color = box.querySelector('input[type="color"]').value;
 
         SaveDataList.push({
-            userId,  // ✅ เพิ่ม userId ไปในข้อมูลที่บันทึก
+            userId,
             namecontainer,  
             nameInput,  
             boxId,

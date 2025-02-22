@@ -67,7 +67,7 @@ function showReport() {
                     <td>${box.length}</td>
                     <td>${box.height}</td>
                     <td>${box.weight}</td>
-                    <td style="background-color: ${box.color}; color: #fff;"></td>
+                    <td class="color-cell" style="background-color: ${box.color}; color: #fff;"></td>
                 </tr>
             `;
         });
